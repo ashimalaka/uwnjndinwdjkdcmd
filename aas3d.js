@@ -4,7 +4,8 @@
     return;
   }
 
-  const T = THREE, C = {
+  const T = THREE;
+  const C = {
     runs: [
       { type: 'Blanko', name: 'Blanko', conc: 0.0, A: [0.002, 0.003, 0.004] },
       { type: 'Standar', name: 'Std 1', conc: 1.0, A: [0.060, 0.065, 0.058] },
@@ -12,17 +13,17 @@
       { type: 'Standar', name: 'Std 3', conc: 3.0, A: [0.180, 0.186, 0.177] }
     ],
     parts: [
-      { id: 1, outer: 'Casing / Rumah Instrumen', fn: 'Melindungi dan menahan seluruh komponen AAS', inner: ['Tutup atas', 'Pintu atomisasi', 'Panel depan'] },
-      { id: 2, outer: 'Lampu HCL', fn: 'Memancarkan cahaya garis spesifik Cu', inner: ['Katoda Cu', 'Anoda', 'Kaca kuarsa'] },
-      { id: 3, outer: 'Tray Sampel', fn: 'Tempat larutan blanko dan standar', inner: ['Vial blanko', 'Vial standar', 'Vial sampel'] },
+      { id: 1, outer: 'Casing / Rumah Instrumen', fn: 'Melindungi komponen optik dan mekanik AAS', inner: ['Tutup atas', 'Pintu atomisasi', 'Panel depan'] },
+      { id: 2, outer: 'Lampu HCL', fn: 'Memancarkan cahaya spesifik unsur target', inner: ['Katoda Cu', 'Anoda', 'Kaca kuarsa'] },
+      { id: 3, outer: 'Sample Tray', fn: 'Tempat larutan blanko, standar serta sampel', inner: ['Vial blanko', 'Vial standar', 'Vial sampel'] },
       { id: 4, outer: 'Nebulizer', fn: 'Mengubah larutan menjadi aerosol halus', inner: ['Kapiler hisap', 'Nosel venturi'] },
       { id: 5, outer: 'Spray Chamber', fn: 'Menyaring droplet besar sebelum nyala', inner: ['Flow spoiler', 'Saluran drain'] },
       { id: 6, outer: 'Burner Head', fn: 'Tempat nyala pembakar AAS', inner: ['Slot burner', 'Leher burner'] },
       { id: 7, outer: 'Gas Supply', fn: 'Udara dan asetilena untuk nyala pembakar', inner: ['Selang udara', 'Selang asetilena'] },
       { id: 8, outer: 'Flame', fn: 'Mengatomisasi unsur Cu', inner: ['Zona primer', 'Zona interkonal'] },
       { id: 9, outer: 'Monokromator', fn: 'Memilih panjang gelombang yang relevan', inner: ['Celah masuk', 'Kisi difraksi'] },
-      { id: 10, outer: 'Detector PMT', fn: 'Menerima sinyal pada gelombang tertentu', inner: ['Fotokatoda', 'Dinoda', 'Anoda'] },
-      { id: 11, outer: 'Elektronik', fn: 'Menguatkan dan mengolah sinyal', inner: ['Amplifier', 'ADC'] },
+      { id: 10, outer: 'Detector PMT', fn: 'Menerima sinyal pada panjang gelombang tertentu', inner: ['Fotokatoda', 'Dinoda', 'Anoda'] },
+      { id: 11, outer: 'Elektronik', fn: 'Menguatkan dan menganalisa sinyal', inner: ['Amplifier', 'ADC'] },
       { id: 12, outer: 'Monitor', fn: 'Menampilkan absorbansi dan hasil', inner: ['Layar', 'Grafik'] },
       { id: 13, outer: 'Exhaust Hood', fn: 'Membuang gas dan uap buangan', inner: ['Duct', 'Kipas'] },
       { id: 14, outer: 'Botol Limbah', fn: 'Menampung cairan sisa', inner: ['Limbah cair'] }
@@ -31,20 +32,20 @@
 
   const $ = (id) => document.getElementById(id);
   const V = (x, y, z) => new T.Vector3(x, y, z);
-  const PI = Math.PI;
+
   const box = $('v');
+  const scene = new T.Scene();
+  scene.background = new T.Color(0xe9edf2);
 
   const renderer = new T.WebGLRenderer({ antialias: true });
   renderer.shadowMap.enabled = true;
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = T.SRGBColorSpace;
   box.prepend(renderer.domElement);
 
-  const scene = new T.Scene();
-  scene.background = new T.Color(0x061a2b);
-
-  const camera = new T.PerspectiveCamera(36, 1, 0.1, 200);
-  let theta = 0.75, phi = 1.1, rad = 25;
-  const target = V(0, 1.5, 0);
+  const camera = new T.PerspectiveCamera(30, 1, 0.1, 200);
+  let theta = 0.9, phi = 1.18, rad = 22;
+  const target = V(0, 2.2, 0);
 
   const setCam = () => {
     camera.position.set(
@@ -63,127 +64,126 @@
   };
   addEventListener('resize', fit);
 
-  scene.add(new T.HemisphereLight(0xffffff, 0x29435b, 0.9));
-  const dir = new T.DirectionalLight(0xffffff, 0.9);
-  dir.position.set(8, 15, 10);
+  const hemi = new T.HemisphereLight(0xffffff, 0x6b7d8d, 0.9);
+  scene.add(hemi);
+
+  const dir = new T.DirectionalLight(0xffffff, 1.0);
+  dir.position.set(10, 18, 8);
   dir.castShadow = true;
   dir.shadow.mapSize.set(2048, 2048);
   scene.add(dir);
 
-  const shine = new T.PointLight(0x5aa9ff, 0.8, 30);
-  shine.position.set(0, 2.6, 5);
-  scene.add(shine);
+  const accent = new T.PointLight(0x8ec6ff, 1.4, 40, 2);
+  accent.position.set(0, 4, 4);
+  scene.add(accent);
+
+  const root = new T.Group();
+  scene.add(root);
 
   const mat = {
-    dark: new T.MeshStandardMaterial({ color: 0x111a22, roughness: 0.7, metalness: 0.3 }),
-    dark2: new T.MeshStandardMaterial({ color: 0x1b2730, roughness: 0.7, metalness: 0.25 }),
-    grey: new T.MeshStandardMaterial({ color: 0xc8d0d6, roughness: 0.45, metalness: 0.55 }),
-    silver: new T.MeshStandardMaterial({ color: 0xb0bac5, roughness: 0.4, metalness: 0.8 }),
-    glass: new T.MeshPhysicalMaterial({ color: 0x9db9c7, roughness: 0.08, metalness: 0.15, transparent: true, opacity: 0.35 }),
-    accent: new T.MeshStandardMaterial({ color: 0x2d7df6, roughness: 0.3, metalness: 0.7 }),
-    smoke: new T.MeshStandardMaterial({ color: 0x515d66, roughness: 0.8, metalness: 0.2 }),
-    blue: new T.MeshStandardMaterial({ color: 0x70c8ff, emissive: 0x1b5e9a, roughness: 0.2, metalness: 0.2 })
+    body: new T.MeshStandardMaterial({ color: 0x1c1f24, roughness: 0.82, metalness: 0.14 }),
+    body2: new T.MeshStandardMaterial({ color: 0x2d2f33, roughness: 0.82, metalness: 0.12 }),
+    body3: new T.MeshStandardMaterial({ color: 0x3d3b38, roughness: 0.86, metalness: 0.14 }),
+    silver: new T.MeshStandardMaterial({ color: 0xdfe5ea, roughness: 0.5, metalness: 0.75 }),
+    slate: new T.MeshStandardMaterial({ color: 0x7d8a95, roughness: 0.7, metalness: 0.25 }),
+    glass: new T.MeshPhysicalMaterial({ color: 0x9db7c8, roughness: 0.08, metalness: 0.18, transparent: true, opacity: 0.35 }),
+    darkGlass: new T.MeshPhysicalMaterial({ color: 0x1e2b36, roughness: 0.25, metalness: 0.1, transparent: true, opacity: 0.7 }),
+    blue: new T.MeshStandardMaterial({ color: 0x7ad1ff, emissive: 0x1c6ea3, roughness: 0.25, metalness: 0.2 }),
+    bright: new T.MeshStandardMaterial({ color: 0xf2f6fa, roughness: 0.35, metalness: 0.6 })
   };
 
-  const M = (geo, material, p, r, s) => {
-    const m = new T.Mesh(geo, material);
-    m.position.set(...(p || [0, 0, 0]));
-    if (r) m.rotation.set(...r);
-    if (s) m.scale.set(...s);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    return m;
+  const make = (geo, material, pos, rot, scale) => {
+    const mesh = new T.Mesh(geo, material);
+    mesh.position.set(pos[0], pos[1], pos[2]);
+    if (rot) mesh.rotation.set(rot[0], rot[1], rot[2]);
+    if (scale) mesh.scale.set(scale[0], scale[1], scale[2]);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
   };
 
-  const group = new T.Group();
-  scene.add(group);
+  // base platform
+  root.add(make(new T.BoxGeometry(18, 1.1, 8), mat.body3, [0, -0.7, 0]));
 
-  // base platform / floor
-  const base = M(new T.BoxGeometry(14, 1.2, 8), mat.dark2, [0, -0.5, 0]);
-  group.add(base);
+  // main machine body silhouette similar to the reference photo
+  const shell = new T.Group();
+  root.add(shell);
 
-  // main body
-  const mainBody = M(new T.BoxGeometry(8.8, 4.0, 5.2), mat.dark, [0, 1.9, 0.3]);
-  group.add(mainBody);
+  const bodyMain = make(new T.BoxGeometry(7.6, 4.4, 4.8), mat.body, [0, 2.2, 0.1]);
+  shell.add(bodyMain);
 
-  // illuminated top cap to match reference photo
-  const topCap = M(new T.BoxGeometry(5.3, 2.7, 3.8), mat.dark, [0, 4.1, 0.2]);
-  topCap.rotation.x = -0.12;
-  group.add(topCap);
+  const bodyFront = make(new T.BoxGeometry(6.2, 2.2, 0.18), mat.slate, [0, 1.9, 2.38]);
+  shell.add(bodyFront);
 
-  // front access panel + dark top face
-  const frontPanel = M(new T.BoxGeometry(6.4, 2.4, 0.18), mat.grey, [0, 2.0, 2.6]);
-  group.add(frontPanel);
+  const topCap = make(new T.CylinderGeometry(2.05, 2.4, 2.7, 6, 1, false), mat.body2, [0, 5.0, 0.15], [0, 0, 0]);
+  topCap.rotation.y = Math.PI / 6;
+  shell.add(topCap);
 
-  // door cavity / opening area
-  const doorFrame = M(new T.BoxGeometry(2.3, 2.0, 0.08), mat.smoke, [-1.6, 1.9, 2.65]);
-  group.add(doorFrame);
+  const topPlate = make(new T.BoxGeometry(4.6, 0.4, 3.0), mat.body2, [0, 4.2, 0.2]);
+  shell.add(topPlate);
 
-  // left sample rack area
-  const tray = M(new T.BoxGeometry(2.6, 1.8, 2.4), mat.dark2, [-4.2, 0.8, 0.5]);
-  tray.rotation.y = 0.2;
-  group.add(tray);
+  const frontDark = make(new T.BoxGeometry(3.7, 2.1, 0.14), mat.darkGlass, [-0.8, 1.9, 2.42]);
+  shell.add(frontDark);
 
-  const trayInset = M(new T.BoxGeometry(2.0, 0.2, 1.6), mat.grey, [-4.2, 1.1, 0.5]);
-  group.add(trayInset);
+  // left sample tray / chamber
+  const tray = new T.Group();
+  tray.position.set(-4.7, 0.8, 0.2);
+  tray.rotation.y = 0.18;
+  root.add(tray);
+  tray.add(make(new T.BoxGeometry(3.3, 1.2, 2.6), mat.body3, [0, 0, 0]));
+  tray.add(make(new T.BoxGeometry(2.5, 0.25, 1.8), mat.slate, [0, 0.42, 0]));
+  tray.add(make(new T.BoxGeometry(2.3, 0.75, 1.6), mat.darkGlass, [0, 0.1, 0]));
 
-  // right detector/block
-  const detector = M(new T.BoxGeometry(2.2, 2.1, 2.0), mat.silver, [4.3, 1.6, 0.5]);
-  group.add(detector);
+  // right detector unit / display
+  const rightUnit = new T.Group();
+  rightUnit.position.set(4.9, 1.2, 0.5);
+  root.add(rightUnit);
+  rightUnit.add(make(new T.BoxGeometry(2.6, 2.1, 2.1), mat.silver, [0, 0, 0]));
+  rightUnit.add(make(new T.BoxGeometry(1.6, 0.8, 0.2), mat.darkGlass, [0, 0.45, 1.06]));
+  rightUnit.add(make(new T.BoxGeometry(1.8, 0.6, 0.16), mat.bright, [0, 0.12, 1.1]));
 
-  const display = M(new T.BoxGeometry(1.4, 0.8, 0.5), mat.glass, [4.4, 2.0, 1.3]);
-  group.add(display);
+  // central optical bridge
+  const bridge = make(new T.BoxGeometry(2.2, 1.9, 1.8), mat.slate, [0, 2.0, 0.45]);
+  root.add(bridge);
 
-  // central optical unit
-  const optical = M(new T.BoxGeometry(2.8, 2.2, 2.3), mat.grey, [0.1, 2.0, 0.35]);
-  group.add(optical);
+  // lamp / black head on top front center
+  const lamp = make(new T.BoxGeometry(1.5, 1.6, 1.2), mat.body, [0.0, 4.2, 1.7]);
+  root.add(lamp);
 
-  // flame chamber / burner slot at the front
-  const burner = M(new T.BoxGeometry(1.6, 0.5, 1.5), mat.silver, [0.2, 0.5, 1.2]);
-  group.add(burner);
+  // front sample inlet / burner slot
+  const burnerSlot = make(new T.BoxGeometry(1.4, 0.22, 0.5), mat.slate, [0.0, 0.38, 2.1]);
+  root.add(burnerSlot);
 
-  // black lamp head at top front
-  const lampHead = M(new T.BoxGeometry(1.8, 1.7, 1.4), mat.dark, [0.1, 4.0, 1.8]);
-  group.add(lampHead);
+  const burner = make(new T.BoxGeometry(1.8, 0.32, 1.1), mat.silver, [0.0, 0.7, 1.2]);
+  root.add(burner);
 
-  // central support beam and slit
-  const support = M(new T.BoxGeometry(0.3, 2.7, 1.8), mat.silver, [0.1, 2.0, 1.3]);
-  group.add(support);
+  // small metal side knob and lower support
+  const sideKnob = make(new T.CylinderGeometry(0.12, 0.12, 1.1, 16), mat.silver, [2.8, 0.2, 1.3], [Math.PI / 2, 0, 0]);
+  root.add(sideKnob);
 
-  // sample inlet tube and burner line
-  const tubeMat = new T.MeshStandardMaterial({ color: 0x7aa7ce, emissive: 0x123857, roughness: 0.55, metalness: 0.3 });
-  const tube = M(new T.CylinderGeometry(0.12, 0.12, 2.7, 16), tubeMat, [-2.4, 0.7, 1.2], [Math.PI / 2, 0, 0]);
-  group.add(tube);
-
-  // top front black sloped cap
-  const hood = M(new T.BoxGeometry(3.8, 1.2, 2.0), mat.dark, [0.2, 4.7, 1.0]);
-  hood.rotation.z = -0.18;
-  group.add(hood);
-
-  // light beam visualization
+  // central beam light
   const beam = new T.Group();
-  const beamMesh = M(new T.CylinderGeometry(0.04, 0.04, 7, 8), mat.blue, [0, 2.3, 0], [Math.PI / 2, 0, 0]);
-  beamMesh.position.z = 0.5;
+  const beamMesh = make(new T.CylinderGeometry(0.05, 0.05, 10, 12), mat.blue, [0, 2.2, 0], [Math.PI / 2, 0, 0]);
   beam.add(beamMesh);
   beam.visible = true;
-  group.add(beam);
+  root.add(beam);
 
-  // labels for components
+  // label references
   const labels = [
-    { id: 1, name: 'Casing / Rumah Instrumen', pos: V(0.4, 4.7, 0.4), inner: ['Tutup atas', 'Pintu atomisasi', 'Panel depan'] },
-    { id: 2, name: 'Hollow Cathode Lamp (HCL)', pos: V(0.2, 5.3, 1.8), inner: ['Katoda Cu', 'Anoda', 'Kaca kuarsa'] },
-    { id: 3, name: 'Sample Tray', pos: V(-4.6, 2.4, 0.6), inner: ['Vial blanko', 'Vial standar'] },
-    { id: 4, name: 'Nebulizer', pos: V(-2.4, 1.8, 1.2), inner: ['Kapiler hisap', 'Nosel venturi'] },
-    { id: 5, name: 'Spray Chamber', pos: V(-1.2, 1.8, -0.2), inner: ['Flow spoiler', 'Saluran drain'] },
-    { id: 6, name: 'Burner Head', pos: V(0.2, 0.9, 1.6), inner: ['Slot burner', 'Leher burner'] },
-    { id: 7, name: 'Gas Supply', pos: V(2.0, 0.9, -1.8), inner: ['Udara', 'Asetilena'] },
-    { id: 8, name: 'Flame', pos: V(0.0, 1.0, 2.0), inner: ['Zona primer', 'Zona interkonal'] },
-    { id: 9, name: 'Monokromator', pos: V(1.5, 3.2, -0.2), inner: ['Celah masuk', 'Kisi difraksi'] },
-    { id: 10, name: 'Detector PMT', pos: V(4.4, 2.8, 0.8), inner: ['Fotokatoda', 'Dinoda'] },
-    { id: 11, name: 'Elektronik', pos: V(4.2, 0.7, -2.1), inner: ['Amplifier', 'ADC'] },
-    { id: 12, name: 'Monitor', pos: V(4.5, 2.2, 2.4), inner: ['Layar', 'Grafik'] },
-    { id: 13, name: 'Exhaust Hood', pos: V(2.2, 5.3, -2.0), inner: ['Duct', 'Kipas'] },
-    { id: 14, name: 'Botol Limbah', pos: V(-2.8, 0.2, -2.4), inner: ['Limbah cair'] }
+    { id: 1, name: 'Casing / Rumah Instrumen', pos: V(0, 5.8, 0.5) },
+    { id: 2, name: 'Hollow Cathode Lamp (HCL)', pos: V(0.2, 6.2, 1.6) },
+    { id: 3, name: 'Sample Tray', pos: V(-4.9, 2.5, 0.9) },
+    { id: 4, name: 'Nebulizer', pos: V(-2.8, 2.5, 1.1) },
+    { id: 5, name: 'Spray Chamber', pos: V(-1.2, 2.5, -0.2) },
+    { id: 6, name: 'Burner Head', pos: V(0.0, 1.0, 2.4) },
+    { id: 7, name: 'Gas Supply', pos: V(3.0, 1.2, -1.8) },
+    { id: 8, name: 'Flame', pos: V(0.0, 1.0, 2.8) },
+    { id: 9, name: 'Monokromator', pos: V(1.4, 3.7, -0.2) },
+    { id: 10, name: 'Detector PMT', pos: V(4.8, 3.4, 0.9) },
+    { id: 11, name: 'Elektronik', pos: V(4.5, 1.0, -1.9) },
+    { id: 12, name: 'Monitor', pos: V(4.9, 2.7, 2.4) },
+    { id: 13, name: 'Exhaust Hood', pos: V(1.7, 6.1, -1.7) },
+    { id: 14, name: 'Botol Limbah', pos: V(-2.5, 0.4, -2.3) }
   ];
 
   function createLabel(label) {
@@ -191,30 +191,30 @@
     el.textContent = label.name;
     el.className = 'o';
     el.onclick = () => onSelect(label.id);
-    $('#labs').appendChild(el);
-    return { obj: el, position: label.pos };
+    $('labs').appendChild(el);
+    return { el, pos: label.pos };
   }
 
   const labelRefs = labels.map(createLabel);
 
-  function projectLabel(label, element) {
-    const vect = label.position.clone();
+  function projectLabel(obj) {
+    const vect = obj.pos.clone();
     vect.project(camera);
     const x = (vect.x * 0.5 + 0.5) * box.clientWidth;
     const y = (-vect.y * 0.5 + 0.5) * box.clientHeight;
-    element.style.left = x + 'px';
-    element.style.top = y + 'px';
-    element.style.display = vect.z > 1 ? 'none' : 'block';
+    obj.el.style.left = x + 'px';
+    obj.el.style.top = y + 'px';
+    obj.el.style.display = vect.z > 1 ? 'none' : 'block';
   }
 
   function onSelect(id) {
     const part = C.parts.find((p) => p.id === id);
     const info = $('info');
     if (!part) return;
-    info.innerHTML = `<b>${part.outer}</b><br>${part.fn}<br><u>Bagian dalam:</u><ul class="inn">${part.inner.map((n) => '<li>' + n + '</li>').join('')}</ul>`;
+    info.innerHTML = '<b>' + part.outer + '</b><br>' + part.fn + '<br><u>Bagian dalam:</u><ul class="inn">' + part.inner.map((n) => '<li>' + n + '</li>').join('') + '</ul>';
   }
 
-  // UI behavior
+  // external controls behavior
   let active = false;
   const steps = [
     'Exhaust ON & lampu HCL pemanasan',
@@ -225,29 +225,17 @@
     'Siap aspirasi sampel'
   ];
   $('steps').innerHTML = steps.map((s) => '<li>' + s + '</li>').join('');
+
   const updateSteps = (n) => {
     [...$('steps').children].forEach((li, i) => {
       li.className = i < n ? 'd' : i === n ? 'a' : '';
     });
   };
 
-  $('bo').onclick = () => {
-    $('lid').value = 1; $('door').value = 1; $('ex').value = 1;
-  };
-  $('bc').onclick = () => {
-    $('lid').value = 0; $('door').value = 0; $('ex').value = 0;
-  };
-
-  $('on').onclick = () => {
-    active = true;
-    updateSteps(4);
-    shine.intensity = 2.3;
-  };
-  $('off').onclick = () => {
-    active = false;
-    updateSteps(-1);
-    shine.intensity = 0.3;
-  };
+  $('bo').onclick = () => { $('lid').value = 1; $('door').value = 1; $('ex').value = 1; };
+  $('bc').onclick = () => { $('lid').value = 0; $('door').value = 0; $('ex').value = 0; };
+  $('on').onclick = () => { active = true; updateSteps(4); };
+  $('off').onclick = () => { active = false; updateSteps(-1); };
 
   const sol = $('sol');
   C.runs.forEach((r, i) => {
@@ -258,11 +246,12 @@
   });
 
   $('m1').onclick = () => {
-    const index = +$('sol').value;
+    const idx = +$('sol').value;
     const row = document.createElement('tr');
-    row.innerHTML = '<td>' + C.runs[index].name + '</td><td>' + C.runs[index].conc + '</td><td>0.180</td><td>62.0</td>';
+    row.innerHTML = '<td>' + C.runs[idx].name + '</td><td>' + C.runs[idx].conc + '</td><td>0.180</td><td>62.0</td>';
     $('res').appendChild(row);
   };
+
   $('mall').onclick = () => {
     $('res').innerHTML = '<tr><th>Larutan</th><th>C</th><th>A</th><th>%T</th></tr>';
     C.runs.forEach((r) => {
@@ -278,16 +267,17 @@
     const y = -(e.clientY - rect.top) / rect.height * 2 + 1;
     const raycaster = new T.Raycaster();
     raycaster.setFromCamera(new T.Vector2(x, y), camera);
-    const hits = raycaster.intersectObjects(group.children, true);
+    const hits = raycaster.intersectObjects(root.children, true);
     return hits[0] ? hits[0].object : null;
   }
 
-  let drag = false, lx = 0, ly = 0, moved = 0;
+  let drag = false, lx = 0, ly = 0, mv = 0;
   renderer.domElement.onpointerdown = (e) => {
-    drag = true; moved = 0; lx = e.clientX; ly = e.clientY;
+    drag = true; mv = 0; lx = e.clientX; ly = e.clientY;
   };
+
   addEventListener('pointerup', (e) => {
-    if (drag && moved < 4 && e.target === renderer.domElement) {
+    if (drag && mv < 4 && e.target === renderer.domElement) {
       const obj = hit(e);
       if (obj) {
         const id = obj.userData.id || 1;
@@ -296,13 +286,15 @@
     }
     drag = false;
   });
+
   renderer.domElement.onpointermove = (e) => {
     if (drag) {
-      moved += Math.abs(e.clientX - lx) + Math.abs(e.clientY - ly);
+      mv += Math.abs(e.clientX - lx) + Math.abs(e.clientY - ly);
       theta -= (e.clientX - lx) * 0.006;
-      phi = Math.min(1.6, Math.max(0.5, phi - (e.clientY - ly) * 0.006));
+      phi = Math.min(1.8, Math.max(0.5, phi - (e.clientY - ly) * 0.006));
       lx = e.clientX; ly = e.clientY;
     }
+
     const h = hit(e);
     const tip = $('tip');
     if (h && h.userData && h.userData.id) {
@@ -320,57 +312,44 @@
 
   renderer.domElement.onwheel = (e) => {
     e.preventDefault();
-    rad = Math.min(32, Math.max(10, rad * (1 + Math.sign(e.deltaY) * 0.08)));
+    rad = Math.min(30, Math.max(12, rad * (1 + Math.sign(e.deltaY) * 0.08)));
   };
 
   function applyState() {
     const lid = +$('lid').value;
     const door = +$('door').value;
     const ex = +$('ex').value;
-    const xr = $('xr').checked;
     const lo = $('lo').checked;
     const li = $('li').checked;
     const bm = $('bm').checked;
 
-    topCap.rotation.x = -0.12 + lid * 0.25;
-    doorFrame.position.z = 2.65 - door * 0.7;
-    doorFrame.rotation.x = -door * 1.3;
+    topCap.rotation.x = -0.2 + lid * 0.25;
+    lamp.position.z = 1.7 + door * 0.7;
+    bridge.position.x = ex * 0.9;
+    tray.position.x = -4.7 - ex * 0.8;
+    rightUnit.position.x = 4.9 + ex * 0.8;
 
-    // Slight explosion separation for component groups
-    [mainBody, topCap, lampHead, tray, burner, optical, detector, tube].forEach((mesh, i) => {
-      const spread = ex * (i % 2 === 0 ? 0.45 : 0.28);
-      mesh.position.x += ((i % 2 === 0 ? 1 : -1) * spread - mesh.position.x * 0.02);
-      mesh.position.z += ((i % 3 === 0 ? 1 : -1) * spread * 0.1);
-    });
-
-    const visible = lo || li;
-    $('#labs').style.display = visible ? 'block' : 'none';
-    labelRefs.forEach(({ obj, position }, idx) => {
-      const show = (idx % 2 === 0 ? lo : li) || (!lo && !li && !xr);
-      obj.style.display = show ? 'block' : 'none';
-      if (show) projectLabel({ position }, obj);
+    labelRefs.forEach((item, idx) => {
+      const visible = (idx % 2 === 0 ? lo : li) || (!lo && !li);
+      item.el.style.display = visible ? 'block' : 'none';
+      if (visible) projectLabel(item);
     });
 
     beam.visible = bm && active;
-    beam.material = active ? mat.blue : mat.smoke;
-    if (active) shine.intensity = 2.2;
-    else shine.intensity = 0.6;
+    beamMesh.material.opacity = active ? 0.9 : 0.2;
+    accent.intensity = active ? 2.0 : 0.6;
   }
 
-  Object.keys({ lid: 1, door: 1, ex: 1 }).forEach((id) => {
-    $(id).addEventListener('input', applyState);
-  });
-  $('xr').addEventListener('change', applyState);
+  $('lid').addEventListener('input', applyState);
+  $('door').addEventListener('input', applyState);
+  $('ex').addEventListener('input', applyState);
   $('lo').addEventListener('change', applyState);
   $('li').addEventListener('change', applyState);
   $('bm').addEventListener('change', applyState);
 
-  // assign userData ids for pickability
-  [mainBody, topCap, lampHead, tray, burner, optical, detector, tube, doorFrame].forEach((obj, idx) => {
-    obj.userData.id = idx + 1;
-  });
+  const pickables = [bodyMain, topCap, lamp, tray, burner, bridge, rightUnit, burnerSlot, sideKnob];
+  pickables.forEach((obj, idx) => { obj.userData.id = idx + 1; });
 
-  // default scene
   fit();
   setCam();
   applyState();
@@ -378,13 +357,14 @@
   function loop() {
     requestAnimationFrame(loop);
     const t = performance.now() * 0.001;
-    group.rotation.y = Math.sin(t * 0.3) * 0.07;
+    root.rotation.y = Math.sin(t * 0.3) * 0.06;
     if (active) {
-      beamMesh.material.emissiveIntensity = 0.6 + Math.sin(t * 8) * 0.2;
-      beam.scale.set(1, 1 + Math.sin(t * 12) * 0.05, 1);
+      beamMesh.scale.set(1, 1 + Math.sin(t * 18) * 0.05, 1);
+      accent.intensity = 2.0 + Math.sin(t * 7) * 0.5;
     }
     setCam();
     renderer.render(scene, camera);
   }
+
   loop();
 })();
