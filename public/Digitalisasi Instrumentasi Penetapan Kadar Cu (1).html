@@ -6,18 +6,21 @@
   <title>Digitalisasi Instrumentasi Penetapan Kadar Cu</title>
   <style>
     :root {
-      --bg: #edf2f7;
-      --panel: rgba(255,255,255,0.92);
-      --panel-strong: #fff;
-      --line: #cbd5e1;
-      --text: #1f2937;
-      --muted: #64748b;
+      --bg: #eef4fb;
+      --bg-2: #e2ebf7;
+      --panel: rgba(255,255,255,0.94);
+      --panel-strong: #ffffff;
+      --line: #cad6e4;
+      --text: #1d2733;
+      --muted: #57697d;
       --accent: #0b5cad;
-      --accent-soft: #dfeeff;
-      --ok: #18794e;
-      --warn: #b45309;
-      --bad: #c62828;
-      --shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+      --accent-soft: #e8f1ff;
+      --accent-2: #4ea1ff;
+      --ok: #177a4d;
+      --warn: #b7791f;
+      --bad: #c83b3b;
+      --shadow: 0 18px 42px rgba(15, 34, 63, 0.12);
+      --radius: 18px;
     }
 
     * { box-sizing: border-box; }
@@ -25,13 +28,16 @@
     html, body {
       margin: 0;
       height: 100%;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: linear-gradient(180deg, #f4f7fb, #eaf0f7);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, var(--bg), var(--bg-2));
       color: var(--text);
+      scroll-behavior: smooth;
     }
 
-    body {
-      overflow: hidden;
+    body { overflow: hidden; }
+
+    button, input, select {
+      font: inherit;
     }
 
     .app {
@@ -41,54 +47,59 @@
     }
 
     .topbar {
-      background: rgba(255,255,255,0.88);
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--line);
       padding: 12px 18px 0;
       flex-shrink: 0;
-      backdrop-filter: blur(8px);
     }
 
     .title {
-      font-size: 1.05rem;
-      font-weight: 700;
       margin: 0;
+      font-size: clamp(1.05rem, 1.2vw + 0.9rem, 1.5rem);
+      font-weight: 800;
+      letter-spacing: 0.01em;
     }
 
     .subtitle {
-      font-size: 0.78rem;
+      margin: 5px 0 0;
       color: var(--muted);
-      margin: 4px 0 0;
+      font-size: 0.8rem;
     }
 
     .tabs {
+      margin-top: 12px;
       display: flex;
       gap: 8px;
-      margin-top: 10px;
       flex-wrap: wrap;
     }
 
     .tab-btn {
-      border: none;
+      appearance: none;
+      border: 0;
       background: transparent;
       color: var(--muted);
-      font-weight: 700;
-      font-size: 0.82rem;
-      padding: 10px 12px 12px;
+      padding: 10px 14px 12px;
       border-bottom: 3px solid transparent;
       cursor: pointer;
+      font-weight: 700;
+      font-size: 0.82rem;
+      border-radius: 10px 10px 0 0;
+      transition: all 0.2s ease;
     }
 
     .tab-btn.active {
+      background: var(--accent-soft);
       color: var(--accent);
       border-bottom-color: var(--accent);
-      background: var(--accent-soft);
-      border-radius: 8px 8px 0 0;
     }
 
     .content {
       flex: 1;
       min-height: 0;
       position: relative;
+      overflow: hidden;
     }
 
     .panel {
@@ -99,23 +110,48 @@
       display: none;
     }
 
-    .panel.active {
-      display: block;
-    }
+    .panel.active { display: block; }
 
     .viewer-panel {
       padding: 0;
-      display: flex;
-      flex-direction: column;
+      display: block;
     }
 
     #viewer {
       position: relative;
-      flex: 1;
-      min-height: 360px;
-      background: radial-gradient(circle at top, #f8fbff, #edf3fb 55%, #dde7f2);
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+      background: radial-gradient(circle at 50% 15%, #f4f9ff 0%, #eaf3ff 25%, #dfeaf9 44%, #d8e3f1 100%);
       border-top: 1px solid var(--line);
       overflow: hidden;
+    }
+
+    .viewer-overlay {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      max-width: 420px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.78);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      z-index: 4;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .viewer-overlay h3 {
+      margin: 0 0 6px;
+      font-size: 0.92rem;
+    }
+
+    .viewer-overlay p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
     }
 
     .viewer-toolbar {
@@ -126,85 +162,64 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      z-index: 5;
       pointer-events: none;
+      z-index: 5;
     }
 
     .toolbar-group {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      background: rgba(255,255,255,0.72);
-      border: 1px solid var(--line);
-      border-radius: 12px;
       padding: 8px;
-      backdrop-filter: blur(8px);
-      pointer-events: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.72);
       box-shadow: var(--shadow);
+      pointer-events: auto;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
 
-    .toolbar-group .mini {
-      padding: 7px 10px;
+    .mini-btn {
+      appearance: none;
       border: 1px solid var(--line);
       background: #fff;
-      border-radius: 8px;
-      font-size: 0.8rem;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 11px;
       cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: all 0.18s ease;
     }
 
-    .toolbar-group .mini.active {
+    .mini-btn.active {
       background: var(--accent);
       color: white;
       border-color: var(--accent);
     }
 
-    .helper {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      max-width: 420px;
-      background: rgba(255,255,255,0.8);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 12px;
-      box-shadow: var(--shadow);
-      z-index: 5;
-    }
-
-    .helper h3 {
-      margin: 0 0 5px;
-      font-size: 0.9rem;
-    }
-
-    .helper p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.45;
-    }
-
     .card {
+      max-width: 980px;
+      margin: 0 auto 16px;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 16px;
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 16px;
-      margin-bottom: 16px;
-      max-width: 980px;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .card h2 {
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       font-size: 1rem;
+      font-weight: 800;
     }
 
     .subtle {
       margin: 0 0 12px;
       color: var(--muted);
-      font-size: 0.82rem;
       line-height: 1.5;
+      font-size: 0.8rem;
     }
 
     .grid {
@@ -217,34 +232,31 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      font-size: 0.78rem;
       color: var(--muted);
-    }
-
-    input, select, button {
-      font: inherit;
+      font-size: 0.78rem;
     }
 
     input, select {
-      width: 100%;
       border: 1px solid var(--line);
-      background: #fff;
+      background: white;
       color: var(--text);
       border-radius: 10px;
+      min-height: 40px;
       padding: 9px 10px;
-      min-height: 38px;
+      width: 100%;
       outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     input:focus, select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(11, 92, 173, 0.12);
+      box-shadow: 0 0 0 4px rgba(11, 92, 173, 0.12);
     }
 
     table {
       width: 100%;
       border-spacing: 0 8px;
-      margin-top: 8px;
+      border-collapse: separate;
       font-size: 0.82rem;
     }
 
@@ -259,14 +271,20 @@
       padding: 0 8px;
     }
 
+    .cell-input {
+      width: 100%;
+      min-width: 110px;
+    }
+
     .delete-btn {
-      border: 1px solid #f3c7c7;
+      border: 1px solid #f1c8c8;
       background: #fff5f5;
       color: var(--bad);
-      border-radius: 8px;
-      min-width: 34px;
+      border-radius: 10px;
+      width: 34px;
       height: 34px;
       cursor: pointer;
+      font-size: 1.1rem;
     }
 
     .action-row {
@@ -276,32 +294,36 @@
       margin-top: 12px;
     }
 
-    button.primary,
-    button.secondary {
+    .btn {
+      appearance: none;
       border-radius: 10px;
       padding: 9px 14px;
       cursor: pointer;
-      font-weight: 600;
       border: 1px solid var(--line);
-      background: #fff;
+      background: white;
       color: var(--text);
+      font-weight: 700;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
     }
 
-    button.primary {
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn.primary {
       background: var(--accent);
       color: white;
       border-color: var(--accent);
+      box-shadow: 0 10px 26px rgba(11, 92, 173, 0.22);
     }
 
     .metrics {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 10px;
-      margin-top: 12px;
+      margin-top: 8px;
     }
 
     .metric {
-      background: #fff;
+      background: var(--panel-strong);
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 12px;
@@ -309,9 +331,8 @@
 
     .metric .v {
       display: block;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 800;
       margin-bottom: 4px;
     }
 
@@ -321,27 +342,37 @@
       color: var(--muted);
     }
 
-    .status {
+    .status-row {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
-      padding: 10px 0;
+      gap: 12px;
       border-top: 1px solid var(--line);
+      padding-top: 8px;
+      margin-top: 10px;
       font-size: 0.8rem;
-      color: var(--text);
     }
 
     .ok { color: var(--ok); font-weight: 700; }
     .warn { color: var(--warn); font-weight: 700; }
     .bad { color: var(--bad); font-weight: 700; }
 
-    .chart-wrap {
-      width: 100%;
+    .note {
       margin-top: 12px;
-      padding: 8px;
+      background: #f8fbff;
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .chart-box {
+      margin-top: 12px;
       background: white;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
+      padding: 8px;
     }
 
     canvas.chart {
@@ -352,111 +383,93 @@
       background: white;
     }
 
-    .theory-box {
-      border-left: 4px solid var(--accent);
-      background: #f8fbff;
-      padding: 12px 12px 12px 14px;
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 0.82rem;
-      line-height: 1.6;
-    }
-
     .report {
-      max-width: 960px;
+      max-width: 980px;
       margin: 0 auto;
       background: white;
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 18px 20px;
-      color: #1a1a1a;
-      font-size: 0.82rem;
       line-height: 1.6;
+      font-size: 0.82rem;
+      color: #1f2a37;
     }
 
     .report h3 {
-      margin: 18px 0 8px;
+      margin: 20px 0 8px;
       font-size: 0.96rem;
     }
 
     .report table {
       width: 100%;
       border-collapse: collapse;
-      border: 1px solid #cfcfcf;
-      margin: 8px 0 14px;
+      border: 1px solid #d6dbe3;
+      margin: 10px 0 16px;
       font-size: 0.8rem;
     }
 
-    .report th,
-    .report td {
-      border: 1px solid #d5d5d5;
+    .report th, .report td {
+      border: 1px solid #d6dbe3;
       padding: 7px 8px;
       text-align: left;
       vertical-align: top;
     }
 
-    .report th {
-      background: #f2f5f9;
-    }
+    .report th { background: #f4f7fb; }
 
     .report img {
-      width: 100%;
-      max-width: 760px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: white;
       display: block;
-      margin: 10px auto 14px;
+      margin: 8px auto 14px;
+      max-width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: white;
     }
 
-    .report .small {
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-
-    @media (max-width: 720px) {
+    @media (max-width: 760px) {
       body { overflow: auto; }
       .panel { position: static; display: none; min-height: 100%; }
       .panel.active { display: block; }
       .content { min-height: auto; }
+      #viewer { height: 420px; }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header class="topbar">
-      <h1 id="pageTitle" class="title">Digitalisasi Instrumentasi Penetapan Kadar Cu</h1>
-      <p class="subtitle">Shimadzu AA-7000 · AAS nyala · Cu 324,8 nm</p>
+      <h1 class="title">Digitalisasi Instrumentasi Penetapan Kadar Cu</h1>
+      <p class="subtitle">Shimadzu AA-7000 • AAS nyala • Cu 324,8 nm</p>
       <nav class="tabs" aria-label="Tab navigasi">
         <button class="tab-btn active" data-tab="tab3d">Model 3D</button>
-        <button class="tab-btn" data-tab="tabdata">Data dan hitung</button>
+        <button class="tab-btn" data-tab="tabdata">Data &amp; hitung</button>
         <button class="tab-btn" data-tab="tabreport">Laporan</button>
       </nav>
     </header>
 
     <main class="content">
-      <section id="tab3d" class="panel viewer-panel active">
+      <section id="tab3d" class="panel active viewer-panel">
         <div id="viewer">
-          <div class="helper">
+          <div class="viewer-overlay">
             <h3>Prinsip AAS yang dimodelkan</h3>
-            <p>Nyala AAS memanaskan aerosol sampel, atom Cu terbentuk, lalu cahaya dari lampu HCL pada panjang gelombang 324,8 nm diserap sesuai kadar Cu. Model ini menampilkan komponen utama: lampu HCL, nebulizer, burner, monokromator, dan detektor.</p>
+            <p>Nyala AAS menghasilkan atom Cu bebas. Radiasi dari HCL Cu pada 324,8 nm diserap sesuai kadar Cu. Komponen utama: lampu HCL, nebulizer, burner, monokromator, detektor, dan sistem baca absorbansi.</p>
           </div>
 
           <div class="viewer-toolbar">
             <div class="toolbar-group">
-              <button class="mini" data-view="iso">Isometrik</button>
-              <button class="mini" data-view="front">Depan</button>
-              <button class="mini" data-view="top">Atas</button>
+              <button class="mini-btn active" data-view="iso">Isometrik</button>
+              <button class="mini-btn" data-view="front">Depan</button>
+              <button class="mini-btn" data-view="top">Atas</button>
             </div>
             <div class="toolbar-group">
-              <button class="mini" id="toggleFlame">Nyalakan api</button>
-              <button class="mini" id="toggleLabel">Label bagian</button>
-              <button class="mini" id="toggleAutoRotate">Putar otomatis</button>
+              <button class="mini-btn" id="toggleFlame">Nyalakan api</button>
+              <button class="mini-btn" id="toggleLabel">Label bagian</button>
+              <button class="mini-btn" id="toggleRotate">Putar otomatis</button>
             </div>
             <div class="toolbar-group">
-              <button class="mini" id="toggleCover">Buka penutup</button>
-              <button class="mini" id="toggleProcess">Proses kerja</button>
+              <button class="mini-btn" id="toggleCover">Buka penutup</button>
+              <button class="mini-btn" id="toggleProcess">Proses kerja</button>
             </div>
           </div>
         </div>
@@ -470,10 +483,10 @@
               <input id="judul" type="text" value="Digitalisasi Instrumentasi Penetapan Kadar Cu" />
             </label>
             <label>Analis
-              <input id="analis" type="text" placeholder="Nama analis" />
+              <input id="analis" type="text" placeholder="Nama analis" value="" />
             </label>
             <label>Tanggal
-              <input id="tanggal" type="date" />
+              <input id="tanggal" type="date" value="" />
             </label>
             <label>Instrumen
               <input id="instrumen" type="text" value="Shimadzu AA-7000" />
@@ -492,7 +505,7 @@
 
         <div class="card">
           <h2>Deret standar</h2>
-          <p class="subtle">Konsentrasi standar dibuat dalam mg/L. Absorbansi diukur pada panjang gelombang Cu 324,8 nm.</p>
+          <p class="subtle">Masukkan standar Cu yang terukur pada panjang gelombang 324,8 nm.</p>
           <table>
             <thead>
               <tr>
@@ -505,7 +518,7 @@
             <tbody id="stdRows"></tbody>
           </table>
           <div class="action-row">
-            <button class="secondary" id="addStd">Tambah titik standar</button>
+            <button class="btn" id="addStd">Tambah standar</button>
           </div>
         </div>
 
@@ -531,8 +544,8 @@
               <input id="vol" type="text" value="50" />
             </label>
           </div>
-          <p class="subtle">Minimal 2 ulangan agar RSD, RPD, dan interval kepercayaan 95% bisa dihitung.</p>
-          <table>
+
+          <table style="margin-top:12px;">
             <thead>
               <tr>
                 <th>#</th>
@@ -543,19 +556,20 @@
             <tbody id="sampleRows"></tbody>
           </table>
           <div class="action-row">
-            <button class="secondary" id="addSample">Tambah ulangan sampel</button>
+            <button class="btn" id="addSample">Tambah ulangan</button>
           </div>
         </div>
 
         <div class="card">
-          <h2>Akurasi (spike recovery)</h2>
-          <p class="subtle">Jika sampel dianalisis dengan penambahan standar, masukkan Cu yang ditambahkan dalam larutan akhir. Kosongkan jika tidak ada spike.</p>
+          <h2>Spike recovery</h2>
+          <p class="subtle">Cu yang ditambahkan pada sampel (nilai dalam larutan akhir). Kosongkan bila tidak digunakan.</p>
           <div class="grid">
-            <label>Cu ditambahkan (mg/L larutan akhir)
+            <label>Cu ditambahkan (mg/L)
               <input id="spkAdd" type="text" value="1.00" />
             </label>
           </div>
-          <table>
+
+          <table style="margin-top:12px;">
             <thead>
               <tr>
                 <th>#</th>
@@ -566,7 +580,7 @@
             <tbody id="spikeRows"></tbody>
           </table>
           <div class="action-row">
-            <button class="secondary" id="addSpike">Tambah ulangan spike</button>
+            <button class="btn" id="addSpike">Tambah spike</button>
           </div>
         </div>
 
@@ -590,13 +604,13 @@
 
         <div class="card">
           <h2>Hasil perhitungan</h2>
-          <div id="results"></div>
-          <div class="chart-wrap">
+          <div id="resultBox"></div>
+          <div class="chart-box">
             <canvas id="calibrationChart" class="chart"></canvas>
           </div>
           <div class="action-row">
-            <button class="primary" id="showReportBtn">Lihat laporan</button>
-            <button class="secondary" id="loadExample">Muat data contoh</button>
+            <button class="btn primary" id="viewLaporan">Lihat laporan</button>
+            <button class="btn" id="loadExample">Muat data contoh</button>
           </div>
         </div>
       </section>
@@ -612,9 +626,9 @@
   <script>
     (() => {
       const state = {
-        std: [[0, 0.0020], [0.5, 0.0905], [1.0, 0.1770], [2.0, 0.3535], [3.0, 0.5290], [4.0, 0.7040], [5.0, 0.8805]],
-        sample: [0.2210, 0.2235, 0.2198],
-        spike: [0.3980, 0.3955, 0.4010],
+        std: [[0, 0.002], [0.5, 0.0905], [1.0, 0.177], [2.0, 0.3535], [3.0, 0.529], [4.0, 0.704], [5.0, 0.881]],
+        sample: [0.221, 0.2235, 0.2198],
+        spike: [0.398, 0.3955, 0.401],
         fields: {
           judul: 'Digitalisasi Instrumentasi Penetapan Kadar Cu',
           analis: '',
@@ -638,14 +652,26 @@
 
       function todayISO() {
         const d = new Date();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return `${d.getFullYear()}-${mm}-${dd}`;
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${d.getFullYear()}-${month}-${day}`;
       }
 
-      function parseNumber(v) {
-        const n = Number(String(v).replace(',', '.').trim());
+      function parseNumber(value) {
+        const n = Number(String(value).replace(',', '.').trim());
         return Number.isFinite(n) ? n : NaN;
+      }
+
+      function mean(arr) {
+        if (!arr.length) return NaN;
+        return arr.reduce((sum, x) => sum + x, 0) / arr.length;
+      }
+
+      function sd(values) {
+        if (values.length < 2) return NaN;
+        const m = mean(values);
+        const variance = values.reduce((sum, x) => sum + (x - m) ** 2, 0) / (values.length - 1);
+        return Math.sqrt(variance);
       }
 
       function fmt(value, digits = 3) {
@@ -653,87 +679,63 @@
         return Number(value).toLocaleString('id-ID', {
           minimumFractionDigits: digits,
           maximumFractionDigits: digits
-        }).replace('.', ',');
+        });
       }
 
-      function fmtShort(value, digits = 3) {
+      function fmtPlain(value, digits = 3) {
         if (!Number.isFinite(value)) return '-';
-        if (Math.abs(value) >= 100) return Number(value).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-        if (Math.abs(value) >= 1) return Number(value).toLocaleString('id-ID', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-        return Number(value).toLocaleString('id-ID', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-      }
-
-      function mean(arr) {
-        if (!arr.length) return 0;
-        return arr.reduce((sum, x) => sum + x, 0) / arr.length;
-      }
-
-      function sd(arr) {
-        if (arr.length < 2) return NaN;
-        const m = mean(arr);
-        const val = arr.reduce((sum, x) => sum + (x - m) ** 2, 0) / (arr.length - 1);
-        return Math.sqrt(val);
+        return Number(value).toFixed(digits);
       }
 
       function linearRegression(points) {
         const n = points.length;
         if (n < 2) return null;
+
         const xs = points.map(p => p[0]);
         const ys = points.map(p => p[1]);
         const xMean = mean(xs);
         const yMean = mean(ys);
+
         const sxx = xs.reduce((sum, x) => sum + (x - xMean) ** 2, 0);
         const sxy = xs.reduce((sum, x, i) => sum + (x - xMean) * (ys[i] - yMean), 0);
+        if (sxx === 0) return null;
+
         const slope = sxy / sxx;
         const intercept = yMean - slope * xMean;
 
         const syx = Math.sqrt(
           points.reduce((sum, p) => {
-            const yHat = intercept + slope * p[0];
-            return sum + (p[1] - yHat) ** 2;
+            const pred = intercept + slope * p[0];
+            return sum + (p[1] - pred) ** 2;
           }, 0) / (n - 2)
         );
 
         const ssTot = ys.reduce((sum, y) => sum + (y - yMean) ** 2, 0);
         const ssRes = points.reduce((sum, p) => {
-          const yHat = intercept + slope * p[0];
-          return sum + (p[1] - yHat) ** 2;
+          const pred = intercept + slope * p[0];
+          return sum + (p[1] - pred) ** 2;
         }, 0);
         const r2 = 1 - (ssRes / ssTot);
         const r = Math.sign(sxy) * Math.sqrt(Math.abs(r2));
-        const lod = 3.3 * syx / slope;
-        const loq = 10 * syx / slope;
 
-        return {
-          slope,
-          intercept,
-          r,
-          r2,
-          syx,
-          lod,
-          loq,
-          equation: `y = ${slope.toFixed(4)}x + ${intercept.toFixed(4)}`
-        };
+        const lod = slope > 0 ? (3.3 * syx) / slope : NaN;
+        const loq = slope > 0 ? (10 * syx) / slope : NaN;
+
+        return { slope, intercept, r, r2, syx, lod, loq };
       }
 
-      function buildRegressionSummary() {
+      function buildSummary() {
         const validStd = state.std
           .map(([x, y]) => [parseNumber(x), parseNumber(y)])
           .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
 
         if (validStd.length < 2) {
-          return {
-            error: 'Isi minimal 2 titik standar yang valid untuk membuat kurva kalibrasi.',
-            rows: []
-          };
+          return { error: 'Minimal 2 titik standar yang valid diperlukan untuk membuat kurva kalibrasi.' };
         }
 
         const reg = linearRegression(validStd);
         if (!reg || !Number.isFinite(reg.slope) || reg.slope <= 0) {
-          return {
-            error: 'Kemiringan kurva kalibrasi tidak valid. Periksa kembali data standar Anda.',
-            rows: []
-          };
+          return { error: 'Kurva kalibrasi tidak valid. Periksa kembali nilai konsentrasi dan absorbansi standar.' };
         }
 
         const sampleAbs = state.sample.map(parseNumber).filter(Number.isFinite);
@@ -742,202 +744,225 @@
         const bobot = parseNumber(document.getElementById('bobot').value) || NaN;
         const vol = parseNumber(document.getElementById('vol').value) || NaN;
         const mode = document.getElementById('mode').value;
-        const dilutionFactor = mode === 'padat' ? (Number.isFinite(bobot) && Number.isFinite(vol) && bobot > 0 && vol > 0 ? (vol * fp) / bobot : NaN) : fp;
+        const dilutionFactor = mode === 'padat'
+          ? (Number.isFinite(bobot) && Number.isFinite(vol) && bobot > 0 && vol > 0 ? (vol * fp) / bobot : NaN)
+          : fp;
 
-        const results = sampleConc.map(item => {
-          const K = item.C * dilutionFactor;
-          return { ...item, K };
-        });
+        const sampleResults = sampleConc.map(item => ({
+          A: item.A,
+          C: item.C,
+          K: item.C * dilutionFactor
+        }));
 
-        const meanK = results.length ? mean(results.map(x => x.K)) : NaN;
-        const sdK = results.length > 1 ? sd(results.map(x => x.K)) : NaN;
+        const meanK = sampleResults.length ? mean(sampleResults.map(x => x.K)) : NaN;
+        const sdK = sampleResults.length > 1 ? sd(sampleResults.map(x => x.K)) : NaN;
         const rsd = Number.isFinite(meanK) && meanK !== 0 ? (sdK / meanK) * 100 : NaN;
-        const rpd = results.length > 1 ? ((Math.max(...results.map(x => x.K)) - Math.min(...results.map(x => x.K))) / meanK) * 100 : NaN;
-        const ci95 = results.length > 1 && Number.isFinite(sdK) ? (2.306 * sdK) / Math.sqrt(results.length) : NaN;
+        const rpd = sampleResults.length > 1
+          ? ((Math.max(...sampleResults.map(x => x.K)) - Math.min(...sampleResults.map(x => x.K))) / meanK) * 100
+          : NaN;
+        const ci95 = sampleResults.length > 1 && Number.isFinite(sdK)
+          ? (2.306 * sdK) / Math.sqrt(sampleResults.length)
+          : NaN;
 
         const spkAdd = parseNumber(document.getElementById('spkAdd').value) || 0;
         const spikeAbs = state.spike.map(parseNumber).filter(Number.isFinite);
-        const spikeData = spikeAbs.map(A => {
+        const spikeResults = spikeAbs.map(A => {
           const C = (A - reg.intercept) / reg.slope;
-          const rec = spkAdd > 0 ? ((C - meanK) / spkAdd) * 100 : NaN;
+          const rec = spkAdd > 0 && Number.isFinite(meanK) ? ((C - meanK) / spkAdd) * 100 : NaN;
           return { A, C, rec };
         });
 
-        const recMean = spikeData.length ? mean(spikeData.map(x => x.rec).filter(Number.isFinite)) : NaN;
-        const recSd = spikeData.length > 1 ? sd(spikeData.map(x => x.rec).filter(Number.isFinite)) : NaN;
+        const recMean = spikeResults.length ? mean(spikeResults.map(x => x.rec).filter(Number.isFinite)) : NaN;
+        const recSd = spikeResults.length > 1 ? sd(spikeResults.map(x => x.rec).filter(Number.isFinite)) : NaN;
 
         const cr = parseNumber(document.getElementById('cr').value) || NaN;
         const ch = parseNumber(document.getElementById('ch').value) || NaN;
         const rlo = parseNumber(document.getElementById('rlo').value) || NaN;
         const rhi = parseNumber(document.getElementById('rhi').value) || NaN;
 
-        const q = {
+        return {
           reg,
-          results,
+          validStd,
+          sampleResults,
           meanK,
           sdK,
           rsd,
           rpd,
           ci95,
+          spikeResults,
           recMean,
           recSd,
-          dilutionFactor,
           mode,
-          validStd,
-          spikeData,
-          cr,
-          ch,
-          rlo,
-          rhi,
-          sampleAbs,
+          dilutionFactor,
           relation: {
             linear: Number.isFinite(cr) ? reg.r >= cr : null,
             precision: Number.isFinite(ch) && Number.isFinite(rsd) ? rsd <= ch : null,
             accuracy: Number.isFinite(rlo) && Number.isFinite(rhi) && Number.isFinite(recMean) ? (recMean >= rlo && recMean <= rhi) : null
           }
         };
-
-        return { error: null, ...q };
       }
 
       function renderRows() {
         const stdBody = document.getElementById('stdRows');
-        stdBody.innerHTML = state.std.map((row, index) => `
+        stdBody.innerHTML = state.std.map((row, idx) => `
           <tr>
-            <td>${index + 1}</td>
-            <td><input data-role="std" data-index="${index}" data-col="0" value="${row[0]}" /></td>
-            <td><input data-role="std" data-index="${index}" data-col="1" value="${row[1]}" /></td>
-            <td><button class="delete-btn" data-delete="std" data-index="${index}">×</button></td>
+            <td>${idx + 1}</td>
+            <td><input class="cell-input" data-role="std" data-index="${idx}" data-col="0" value="${row[0]}" /></td>
+            <td><input class="cell-input" data-role="std" data-index="${idx}" data-col="1" value="${row[1]}" /></td>
+            <td><button class="delete-btn" data-delete="std" data-index="${idx}" aria-label="Hapus standar ${idx + 1}">×</button></td>
           </tr>
         `).join('');
 
         const sampleBody = document.getElementById('sampleRows');
-        sampleBody.innerHTML = state.sample.map((val, index) => `
+        sampleBody.innerHTML = state.sample.map((v, idx) => `
           <tr>
-            <td>${index + 1}</td>
-            <td><input data-role="sample" data-index="${index}" value="${val}" /></td>
-            <td><button class="delete-btn" data-delete="sample" data-index="${index}">×</button></td>
+            <td>${idx + 1}</td>
+            <td><input class="cell-input" data-role="sample" data-index="${idx}" value="${v}" /></td>
+            <td><button class="delete-btn" data-delete="sample" data-index="${idx}" aria-label="Hapus sampel ${idx + 1}">×</button></td>
           </tr>
         `).join('');
 
         const spikeBody = document.getElementById('spikeRows');
-        spikeBody.innerHTML = state.spike.map((val, index) => `
+        spikeBody.innerHTML = state.spike.map((v, idx) => `
           <tr>
-            <td>${index + 1}</td>
-            <td><input data-role="spike" data-index="${index}" value="${val}" /></td>
-            <td><button class="delete-btn" data-delete="spike" data-index="${index}">×</button></td>
+            <td>${idx + 1}</td>
+            <td><input class="cell-input" data-role="spike" data-index="${idx}" value="${v}" /></td>
+            <td><button class="delete-btn" data-delete="spike" data-index="${idx}" aria-label="Hapus spike ${idx + 1}">×</button></td>
           </tr>
         `).join('');
       }
 
       function fillFields() {
-        Object.entries(state.fields).forEach(([key, val]) => {
+        Object.entries(state.fields).forEach(([key, value]) => {
           const el = document.getElementById(key);
-          if (el) el.value = val;
+          if (el) el.value = value;
         });
-        document.getElementById('pageTitle').textContent = state.fields.judul || 'Digitalisasi Instrumentasi Penetapan Kadar Cu';
       }
 
-      function updateAll() {
-        const summary = buildRegressionSummary();
-        const resultsEl = document.getElementById('results');
-
-        if (summary.error) {
-          resultsEl.innerHTML = `<div class="theory-box"><strong>Perhatian:</strong> ${summary.error}</div>`;
-          document.getElementById('calibrationChart').getContext('2d').clearRect(0, 0, canvasWidth, canvasHeight);
-          document.getElementById('reportBox').innerHTML = '<div class="theory-box">Isi data standar dan sampel terlebih dahulu untuk menghasilkan laporan.</div>';
+      function renderResult(summary) {
+        const resultBox = document.getElementById('resultBox');
+        if (!summary || summary.error) {
+          resultBox.innerHTML = `<div class="note"><strong>Perhatian:</strong> ${summary ? summary.error : 'Data belum lengkap.'}</div>`;
           return;
         }
 
-        const { reg, results, meanK, sdK, rsd, rpd, ci95, recMean, recSd, relation, mode } = summary;
+        const mode = summary.mode;
         const unit = mode === 'padat' ? 'mg/kg' : 'mg/L';
+        const cr = parseNumber(document.getElementById('cr').value) || 0;
+        const ch = parseNumber(document.getElementById('ch').value) || 0;
 
-        const metricHtml = `
+        resultBox.innerHTML = `
           <div class="metrics">
-            <div class="metric"><span class="v">${reg.equation}</span><span class="k">Persamaan regresi</span></div>
-            <div class="metric"><span class="v">${fmt(reg.r, 4)}</span><span class="k">Koefisien korelasi (r)</span></div>
-            <div class="metric"><span class="v">${fmt(reg.r2, 4)}</span><span class="k">R²</span></div>
-            <div class="metric"><span class="v">${fmt(reg.lod, 3)} mg/L</span><span class="k">LOD</span></div>
-            <div class="metric"><span class="v">${fmt(reg.loq, 3)} mg/L</span><span class="k">LOQ</span></div>
-            <div class="metric"><span class="v">${Number.isFinite(meanK) ? fmt(meanK, 3) + ' ' + unit : '-'}</span><span class="k">Kadar rata-rata sampel</span></div>
+            <div class="metric"><span class="v">${summary.reg.equation}</span><span class="k">Persamaan regresi</span></div>
+            <div class="metric"><span class="v">${fmt(summary.reg.r, 4)}</span><span class="k">Koefisien korelasi (r)</span></div>
+            <div class="metric"><span class="v">${fmt(summary.reg.r2, 4)}</span><span class="k">R²</span></div>
+            <div class="metric"><span class="v">${fmt(summary.reg.lod, 3)} mg/L</span><span class="k">LOD</span></div>
+            <div class="metric"><span class="v">${fmt(summary.reg.loq, 3)} mg/L</span><span class="k">LOQ</span></div>
+            <div class="metric"><span class="v">${Number.isFinite(summary.meanK) ? fmt(summary.meanK, 3) + ' ' + unit : '-'}</span><span class="k">Kadar rata-rata sampel</span></div>
           </div>
 
-          <div class="status"><span>Linearitas (r ≥ ${fmt(parseNumber(document.getElementById('cr').value) || 0, 3)})</span><span class="${relation.linear === true ? 'ok' : 'bad'}">${relation.linear === true ? 'Memenuhi' : relation.linear === false ? 'Tidak memenuhi' : 'Tidak dievaluasi'}</span></div>
-          <div class="status"><span>Presisi (HorRat ≤ ${fmt(parseNumber(document.getElementById('ch').value) || 0, 1)})</span><span class="${relation.precision === true ? 'ok' : 'bad'}">${relation.precision === true ? 'Memenuhi' : relation.precision === false ? 'Tidak memenuhi' : 'Tidak dievaluasi'}</span></div>
-          <div class="status"><span>Akurasi recovery (%)</span><span class="${relation.accuracy === true ? 'ok' : 'bad'}">${relation.accuracy === true ? 'Memenuhi' : relation.accuracy === false ? 'Tidak memenuhi' : 'Tidak dievaluasi'}</span></div>
+          <div class="status-row">
+            <span>Linearitas (r ≥ ${fmt(cr, 3)})</span>
+            <span class="${summary.relation.linear === true ? 'ok' : 'bad'}">${summary.relation.linear === true ? 'Memenuhi' : 'Tidak memenuhi'}</span>
+          </div>
+          <div class="status-row">
+            <span>Presisi (HorRat ≤ ${fmt(ch, 1)})</span>
+            <span class="${summary.relation.precision === true ? 'ok' : 'bad'}">${summary.relation.precision === true ? 'Memenuhi' : 'Tidak memenuhi'}</span>
+          </div>
+          <div class="status-row">
+            <span>Akurasi recovery</span>
+            <span class="${summary.relation.accuracy === true ? 'ok' : 'bad'}">${summary.relation.accuracy === true ? 'Memenuhi' : 'Tidak memenuhi'}</span>
+          </div>
 
-          <div class="theory-box">
-            AAS bekerja berdasarkan prinsip penyerapan cahaya oleh atom bebas pada panjang gelombang karakteristik. Lampu HCL Cu memancarkan radiasi 324,8 nm. Atom Cu di nyala akan menyerap radiasi ini sesuai konsentrasi; hubungan antara absorbansi dan konsentrasi mengikuti hukum Lambert-Beer.
+          <div class="note">
+            Prinsip AAS: atom Cu yang terbentuk di nyala menyerap radiasi dari lampu HCL Cu pada panjang gelombang 324,8 nm. Semakin tinggi kadar Cu, semakin besar absorbansi yang terukur dan semakin tinggi konsentrasi hasil penghitungan.
           </div>
         `;
-
-        resultsEl.innerHTML = metricHtml;
-        drawChart(summary);
-        renderReport(summary);
       }
 
       function drawChart(summary) {
         const canvas = document.getElementById('calibrationChart');
         const ctx = canvas.getContext('2d');
         const dpr = window.devicePixelRatio || 1;
-        const width = Math.max(720, canvas.parentElement.clientWidth);
+        const width = Math.max(700, canvas.clientWidth || 700);
         const height = 320;
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.clearRect(0, 0, width, height);
 
-        const margin = { top: 24, right: 24, bottom: 40, left: 56 };
+        const margin = { top: 24, right: 30, bottom: 42, left: 58 };
         const plotW = width - margin.left - margin.right;
         const plotH = height - margin.top - margin.bottom;
 
         const xs = summary.validStd.map(p => p[0]);
         const ys = summary.validStd.map(p => p[1]);
-        const sampleXs = summary.results.map(r => r.C);
-        const sampleYs = summary.results.map(r => r.A);
+        const sampleXs = summary.sampleResults.map(r => r.C);
+        const sampleYs = summary.sampleResults.map(r => r.A);
         const allXs = [...xs, ...sampleXs];
         const allYs = [...ys, ...sampleYs];
+
         const xMax = Math.max(...allXs, 1);
         const yMax = Math.max(...allYs, 0.1);
 
         const xScale = x => margin.left + (x / xMax) * plotW;
         const yScale = y => margin.top + plotH - (y / yMax) * plotH;
 
-        ctx.strokeStyle = '#dfe7f1';
+        ctx.clearRect(0, 0, width, height);
+        ctx.strokeStyle = '#e1e8f1';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 5; i++) {
           const x = margin.left + (i / 5) * plotW;
+          const y = margin.top + (i / 5) * plotH;
           ctx.beginPath();
           ctx.moveTo(x, margin.top);
           ctx.lineTo(x, margin.top + plotH);
           ctx.stroke();
-        }
-        for (let i = 0; i <= 5; i++) {
-          const y = margin.top + plotH - (i / 5) * plotH;
           ctx.beginPath();
           ctx.moveTo(margin.left, y);
           ctx.lineTo(margin.left + plotW, y);
           ctx.stroke();
         }
 
-        ctx.strokeStyle = '#3a4668';
+        ctx.strokeStyle = '#334155';
         ctx.beginPath();
         ctx.moveTo(margin.left, margin.top + plotH);
         ctx.lineTo(margin.left + plotW, margin.top + plotH);
-        ctx.lineTo(margin.left + plotW, margin.top);
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + plotH);
         ctx.stroke();
 
-        ctx.fillStyle = '#475569';
+        ctx.strokeStyle = '#e09d2a';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(xScale(0), yScale(summary.reg.intercept));
+        ctx.lineTo(xScale(xMax), yScale(summary.reg.intercept + summary.reg.slope * xMax));
+        ctx.stroke();
+
+        ctx.fillStyle = '#0b5cad';
+        summary.validStd.forEach(([x, y]) => {
+          ctx.beginPath();
+          ctx.arc(xScale(x), yScale(y), 4.2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.fillStyle = '#1b7d45';
+        summary.sampleResults.forEach(r => {
+          ctx.beginPath();
+          ctx.arc(xScale(r.C), yScale(r.A), 4.6, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.fillStyle = '#4b5d73';
         ctx.font = '12px Segoe UI';
         ctx.textAlign = 'center';
         for (let i = 0; i <= 5; i++) {
-          const xtick = (xMax / 5) * i;
-          ctx.fillText(fmt(xtick, 1), xScale(xtick), height - 12);
+          const tick = (xMax / 5) * i;
+          ctx.fillText(fmtPlain(tick, 1), xScale(tick), height - 12);
         }
         ctx.textAlign = 'right';
         for (let i = 0; i <= 5; i++) {
-          const ytick = (yMax / 5) * i;
-          ctx.fillText(fmt(ytick, 3), margin.left - 8, yScale(ytick) + 4);
+          const tick = (yMax / 5) * i;
+          ctx.fillText(fmtPlain(tick, 3), margin.left - 8, yScale(tick) + 4);
         }
 
         ctx.fillStyle = '#0b5cad';
@@ -949,44 +974,28 @@
         ctx.fillText('Absorbansi', 0, 0);
         ctx.restore();
 
-        ctx.strokeStyle = '#e07a1f';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        const x0 = 0;
-        const x1 = xMax;
-        const y0 = summary.reg.intercept;
-        const y1 = summary.reg.intercept + summary.reg.slope * x1;
-        ctx.moveTo(xScale(x0), yScale(y0));
-        ctx.lineTo(xScale(x1), yScale(y1));
-        ctx.stroke();
-
-        ctx.fillStyle = '#0b5cad';
-        summary.validStd.forEach(([x, y]) => {
-          ctx.beginPath();
-          ctx.arc(xScale(x), yScale(y), 4, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        ctx.fillStyle = '#1a7f37';
-        summary.results.forEach(r => {
-          ctx.beginPath();
-          ctx.arc(xScale(r.C), yScale(r.A), 4.5, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
         ctx.fillStyle = '#1f2937';
-        ctx.font = '600 12px Segoe UI';
         ctx.textAlign = 'left';
+        ctx.font = '600 12px Segoe UI';
         ctx.fillText('Standar', margin.left + 12, margin.top + 18);
-        ctx.fillStyle = '#1a7f37';
+        ctx.fillStyle = '#1b7d45';
         ctx.fillText('Sampel', margin.left + 110, margin.top + 18);
-        ctx.strokeStyle = '#e07a1f';
+        ctx.strokeStyle = '#e09d2a';
         ctx.beginPath();
-        ctx.moveTo(margin.left + 220, margin.top + 12);
-        ctx.lineTo(margin.left + 260, margin.top + 12);
+        ctx.moveTo(margin.left + 200, margin.top + 12);
+        ctx.lineTo(margin.left + 250, margin.top + 12);
         ctx.stroke();
         ctx.fillStyle = '#1f2937';
-        ctx.fillText('Regresi', margin.left + 270, margin.top + 18);
+        ctx.fillText('Regresi', margin.left + 260, margin.top + 18);
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
       }
 
       function renderReport(summary) {
@@ -1000,10 +1009,11 @@
         const ci95 = summary.ci95;
         const recMean = summary.recMean;
 
-        const report = `
+        const reportHtml = `
           <h3>1. Prinsip kerja AAS</h3>
-          <div class="theory-box">
-            AAS (Atomic Absorption Spectrometry) bekerja dengan memberi radiasi berintensitas pada atom bebas yang terbentuk di nyala. Lampu HCL Cu memancarkan cahaya pada panjang gelombang karakteristik 324,8 nm. Atom Cu di dalam nyala akan menyerap radiasi tersebut sesuai dengan jumlah atom yang ada. Besarnya absorbansi berbanding lurus dengan konsentrasi Cu menurut hukum Lambert-Beer, yaitu A = ε b c.
+          <div class="note">
+            AAS (Atomic Absorption Spectrometry) mengukur penyerapan cahaya oleh atom bebas pada panjang gelombang karakteristik. Dalam instrumen Shimadzu AA-7000, sampel berupa aerosol dinyalakan, atom Cu terbentuk, lalu lampu HCL Cu memancarkan panjang gelombang 324,8 nm yang diserap oleh atom Cu. Besarnya absorbansi berhubungan dengan konsentrasi Cu menurut hukum Lambert-Beer.<br>
+            A = ε b c
           </div>
 
           <h3>2. Data pengamatan</h3>
@@ -1013,15 +1023,15 @@
             <tr><td>Panjang gelombang</td><td>${escapeHtml(document.getElementById('wl').value)} nm</td></tr>
             <tr><td>Nyala</td><td>${escapeHtml(document.getElementById('nyala').value)}</td></tr>
             <tr><td>Sumber cahaya</td><td>${escapeHtml(document.getElementById('lampu').value)}</td></tr>
-            <tr><td>Sampel</td><td>${escapeHtml(document.getElementById('sampel').value)}</td></tr>
+            <tr><td>Nama sampel</td><td>${escapeHtml(document.getElementById('sampel').value)}</td></tr>
             <tr><td>Jenis sampel</td><td>${mode === 'padat' ? 'Padat' : 'Cair'}</td></tr>
           </table>
 
-          <h3>3. Kurva kalibrasi dan parameter statistik</h3>
-          <img src="${calibrationPNG(summary)}" alt="Kurva kalibrasi Cu" />
+          <h3>3. Kurva kalibrasi</h3>
+          <img src="${calibrationDataUrl(summary)}" alt="Kurva kalibrasi Cu" />
           <table>
             <tr><th>Parameter</th><th>Nilai</th></tr>
-            <tr><td>Persamaan regresi</td><td>${reg.equation}</td></tr>
+            <tr><td>Persamaan regresi</td><td>${reg.slope.toFixed(4)}x + ${reg.intercept.toFixed(4)}</td></tr>
             <tr><td>Koefisien korelasi r</td><td>${fmt(reg.r, 4)}</td></tr>
             <tr><td>R²</td><td>${fmt(reg.r2, 4)}</td></tr>
             <tr><td>LOD</td><td>${fmt(reg.lod, 3)} mg/L</td></tr>
@@ -1030,8 +1040,8 @@
 
           <h3>4. Hasil sampel</h3>
           <table>
-            <tr><th>Ulangan</th><th>Absorbansi</th><th>konsentrasi larutan (mg/L)</th><th>Kadar (${unit})</th></tr>
-            ${summary.results.map((r, i) => `
+            <tr><th>Ulangan</th><th>Absorbansi</th><th>Konsentrasi larutan (mg/L)</th><th>Kadar (${unit})</th></tr>
+            ${summary.sampleResults.map((r, i) => `
               <tr>
                 <td>${i + 1}</td>
                 <td>${fmt(r.A, 4)}</td>
@@ -1053,7 +1063,7 @@
           <h3>5. Akurasi (spike recovery)</h3>
           <table>
             <tr><th>Ulangan</th><th>Absorbansi spike</th><th>%Recovery</th></tr>
-            ${summary.spikeData.map((r, i) => `
+            ${summary.spikeResults.map((r, i) => `
               <tr>
                 <td>${i + 1}</td>
                 <td>${fmt(r.A, 4)}</td>
@@ -1066,16 +1076,16 @@
           <h3>6. Kesimpulan</h3>
           <p>
             Kadar Cu pada sampel ${escapeHtml(document.getElementById('sampel').value)} adalah <strong>${Number.isFinite(meanK) ? fmt(meanK, 4) + ' ' + unit : 'belum tersedia'}</strong>.
-            Persamaan kurva kalibrasi ${reg.equation} menunjukkan linearitas yang ${summary.relation.linear === true ? 'memenuhi' : 'belum memenuhi'} kriteria r ≥ ${fmt(parseNumber(document.getElementById('cr').value) || 0, 3)}.
-            Presisi menunjukkan ${Number.isFinite(rsd) ? '%RSD = ' + fmt(rsd, 2) + '%' : 'data presisi belum lengkap'} dan akurasi ${Number.isFinite(recMean) ? 'recovery rata-rata = ' + fmt(recMean, 2) + '%' : 'belum ditentukan'}.
-            Prinsip AAS yang teramati konsisten dengan teori: atom Cu menyerap cahaya pada 324,8 nm sesuai kadar yang ada, sehingga absorbansi merupakan indikator kuantitatif Cu dalam sample.
+            Kurva kalibrasi memperoleh persamaan ${reg.slope.toFixed(4)}x + ${reg.intercept.toFixed(4)} dengan r = ${fmt(reg.r, 4)}, sehingga linearitas ${summary.relation.linear === true ? 'memenuhi kriteria' : 'belum memenuhi kriteria'}.
+            Nilai presisi dan akurasi menunjukkan ${Number.isFinite(rsd) ? 'RSD = ' + fmt(rsd, 2) + '%' : 'data presisi belum lengkap'} dan ${Number.isFinite(recMean) ? 'recovery rata-rata = ' + fmt(recMean, 2) + '%' : 'data akurasi belum lengkap'}.
+            Hasil ini konsisten dengan prinsip AAS: absorbansi pada panjang gelombang 324,8 nm meningkat seiring kenaikan kadar Cu dalam sampel.
           </p>
         `;
 
-        document.getElementById('reportBox').innerHTML = report;
+        document.getElementById('reportBox').innerHTML = reportHtml;
       }
 
-      function calibrationPNG(summary) {
+      function calibrationDataUrl(summary) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 900;
@@ -1093,16 +1103,14 @@
         const xScale = x => margin.left + (x / xMax) * plotW;
         const yScale = y => margin.top + plotH - (y / yMax) * plotH;
 
-        ctx.strokeStyle = '#dfe7f1';
+        ctx.strokeStyle = '#e2e8f0';
         for (let i = 0; i <= 5; i++) {
           const x = margin.left + (i / 5) * plotW;
+          const y = margin.top + (i / 5) * plotH;
           ctx.beginPath();
           ctx.moveTo(x, margin.top);
           ctx.lineTo(x, margin.top + plotH);
           ctx.stroke();
-        }
-        for (let i = 0; i <= 5; i++) {
-          const y = margin.top + plotH - (i / 5) * plotH;
           ctx.beginPath();
           ctx.moveTo(margin.left, y);
           ctx.lineTo(margin.left + plotW, y);
@@ -1116,7 +1124,7 @@
         ctx.lineTo(margin.left + plotW, margin.top);
         ctx.stroke();
 
-        ctx.strokeStyle = '#e07a1f';
+        ctx.strokeStyle = '#e09d2a';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(xScale(0), yScale(summary.reg.intercept));
@@ -1126,14 +1134,14 @@
         ctx.fillStyle = '#0b5cad';
         summary.validStd.forEach(([x, y]) => {
           ctx.beginPath();
-          ctx.arc(xScale(x), yScale(y), 5, 0, Math.PI * 2);
+          ctx.arc(xScale(x), yScale(y), 5.2, 0, Math.PI * 2);
           ctx.fill();
         });
 
-        ctx.fillStyle = '#1a7f37';
-        summary.results.forEach(r => {
+        ctx.fillStyle = '#1b7d45';
+        summary.sampleResults.forEach(r => {
           ctx.beginPath();
-          ctx.arc(xScale(r.C), yScale(r.A), 5, 0, Math.PI * 2);
+          ctx.arc(xScale(r.C), yScale(r.A), 5.2, 0, Math.PI * 2);
           ctx.fill();
         });
 
@@ -1142,12 +1150,12 @@
         ctx.textAlign = 'center';
         for (let i = 0; i <= 5; i++) {
           const tick = (xMax / 5) * i;
-          ctx.fillText(fmt(tick, 1), xScale(tick), canvas.height - 12);
+          ctx.fillText(fmtPlain(tick, 1), xScale(tick), canvas.height - 10);
         }
         ctx.textAlign = 'right';
         for (let i = 0; i <= 5; i++) {
           const tick = (yMax / 5) * i;
-          ctx.fillText(fmt(tick, 3), margin.left - 8, yScale(tick) + 4);
+          ctx.fillText(fmtPlain(tick, 3), margin.left - 8, yScale(tick) + 4);
         }
 
         ctx.fillStyle = '#0b5cad';
@@ -1162,37 +1170,20 @@
         return canvas.toDataURL('image/png');
       }
 
-      function escapeHtml(value) {
-        return String(value)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#039;');
+      function refresh() {
+        const summary = buildSummary();
+        if (summary.error) {
+          document.getElementById('resultBox').innerHTML = `<div class="note"><strong>Perhatian:</strong> ${summary.error}</div>`;
+          document.getElementById('reportBox').innerHTML = '<div class="note">Isi data standar dan sampel untuk menyiapkan laporan.</div>';
+          return;
+        }
+
+        renderResult(summary);
+        drawChart(summary);
+        renderReport(summary);
       }
 
-      function syncInputsFromState() {
-        fillFields();
-        renderRows();
-      }
-
-      function addRow(type) {
-        if (type === 'std') state.std.push(['', '']);
-        if (type === 'sample') state.sample.push('');
-        if (type === 'spike') state.spike.push('');
-        renderRows();
-        updateAll();
-      }
-
-      function deleteRow(type, index) {
-        if (type === 'std' && state.std.length > 2) state.std.splice(index, 1);
-        if (type === 'sample' && state.sample.length > 1) state.sample.splice(index, 1);
-        if (type === 'spike' && state.spike.length > 0) state.spike.splice(index, 1);
-        renderRows();
-        updateAll();
-      }
-
-      function gatherFieldState() {
+      function syncFieldState() {
         state.fields.judul = document.getElementById('judul').value;
         state.fields.analis = document.getElementById('analis').value;
         state.fields.tanggal = document.getElementById('tanggal').value;
@@ -1212,67 +1203,35 @@
         state.fields.spkAdd = document.getElementById('spkAdd').value;
       }
 
-      function initDataBindings() {
-        document.getElementById('addStd').addEventListener('click', () => addRow('std'));
-        document.getElementById('addSample').addEventListener('click', () => addRow('sample'));
-        document.getElementById('addSpike').addEventListener('click', () => addRow('spike'));
-        document.getElementById('showReportBtn').addEventListener('click', () => switchTab('tabreport'));
-        document.getElementById('loadExample').addEventListener('click', () => loadExample());
-
-        document.addEventListener('input', (event) => {
-          const target = event.target;
-          if (target.matches('input[data-role="std"]')) {
-            const i = Number(target.dataset.index);
-            const col = Number(target.dataset.col);
-            state.std[i][col] = target.value;
-            gatherFieldState();
-            updateAll();
-            return;
-          }
-          if (target.matches('input[data-role="sample"]')) {
-            const i = Number(target.dataset.index);
-            state.sample[i] = target.value;
-            gatherFieldState();
-            updateAll();
-            return;
-          }
-          if (target.matches('input[data-role="spike"]')) {
-            const i = Number(target.dataset.index);
-            state.spike[i] = target.value;
-            gatherFieldState();
-            updateAll();
-            return;
-          }
-
-          if (target.matches('#judul, #analis, #tanggal, #instrumen, #wl, #nyala, #lampu, #sampel, #mode, #fp, #bobot, #vol, #cr, #ch, #rlo, #rhi, #spkAdd')) {
-            gatherFieldState();
-            updateAll();
-          }
-        });
-
-        document.addEventListener('click', (event) => {
-          const delBtn = event.target.closest('[data-delete]');
-          if (delBtn) {
-            deleteRow(delBtn.dataset.delete, Number(delBtn.dataset.index));
-            return;
-          }
-          const tab = event.target.closest('.tab-btn');
-          if (tab) {
-            switchTab(tab.dataset.tab);
-            return;
-          }
-        });
+      function addRow(kind) {
+        if (kind === 'std') state.std.push(['', '']);
+        if (kind === 'sample') state.sample.push('');
+        if (kind === 'spike') state.spike.push('');
+        renderRows();
+        refresh();
       }
 
-      function switchTab(name) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === name));
-        document.querySelectorAll('.panel').forEach(panel => panel.classList.toggle('active', panel.id === name));
+      function deleteRow(kind, idx) {
+        if (kind === 'std' && state.std.length > 2) state.std.splice(idx, 1);
+        if (kind === 'sample' && state.sample.length > 1) state.sample.splice(idx, 1);
+        if (kind === 'spike' && state.spike.length > 0) state.spike.splice(idx, 1);
+        renderRows();
+        refresh();
+      }
+
+      function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tab === tabName);
+        });
+        document.querySelectorAll('.panel').forEach(panel => {
+          panel.classList.toggle('active', panel.id === tabName);
+        });
       }
 
       function loadExample() {
-        state.std = [[0, 0.0020], [0.5, 0.0905], [1.0, 0.1770], [2.0, 0.3535], [3.0, 0.5290], [4.0, 0.7040], [5.0, 0.8805]];
-        state.sample = [0.2210, 0.2235, 0.2198];
-        state.spike = [0.3980, 0.3955, 0.4010];
+        state.std = [[0, 0.002], [0.5, 0.0905], [1.0, 0.177], [2.0, 0.3535], [3.0, 0.529], [4.0, 0.704], [5.0, 0.881]];
+        state.sample = [0.221, 0.2235, 0.2198];
+        state.spike = [0.398, 0.3955, 0.401];
         state.fields = {
           judul: 'Digitalisasi Instrumentasi Penetapan Kadar Cu',
           analis: 'Analis Lab',
@@ -1292,14 +1251,67 @@
           rhi: '110',
           spkAdd: '1.00'
         };
-        syncInputsFromState();
-        updateAll();
+        fillFields();
+        renderRows();
+        refresh();
+      }
+
+      function bindEvents() {
+        document.getElementById('addStd').addEventListener('click', () => addRow('std'));
+        document.getElementById('addSample').addEventListener('click', () => addRow('sample'));
+        document.getElementById('addSpike').addEventListener('click', () => addRow('spike'));
+        document.getElementById('loadExample').addEventListener('click', loadExample);
+        document.getElementById('viewLaporan').addEventListener('click', () => switchTab('tabreport'));
+
+        document.addEventListener('input', event => {
+          const target = event.target;
+
+          if (target.matches('[data-role="std"]')) {
+            const idx = Number(target.dataset.index);
+            const col = Number(target.dataset.col);
+            state.std[idx][col] = target.value;
+            refresh();
+            return;
+          }
+
+          if (target.matches('[data-role="sample"]')) {
+            state.sample[Number(target.dataset.index)] = target.value;
+            refresh();
+            return;
+          }
+
+          if (target.matches('[data-role="spike"]')) {
+            state.spike[Number(target.dataset.index)] = target.value;
+            refresh();
+            return;
+          }
+
+          if (target.matches('#judul, #analis, #tanggal, #instrumen, #wl, #nyala, #lampu, #sampel, #mode, #fp, #bobot, #vol, #cr, #ch, #rlo, #rhi, #spkAdd')) {
+            syncFieldState();
+            refresh();
+          }
+        });
+
+        document.addEventListener('click', event => {
+          const deleteBtn = event.target.closest('[data-delete]');
+          if (deleteBtn) {
+            const kind = deleteBtn.dataset.delete;
+            const idx = Number(deleteBtn.dataset.index);
+            deleteRow(kind, idx);
+            return;
+          }
+
+          const tab = event.target.closest('.tab-btn');
+          if (tab) {
+            switchTab(tab.dataset.tab);
+          }
+        });
       }
 
       function init3D() {
         const host = document.getElementById('viewer');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xeaf2fa);
+        scene.background = new THREE.Color(0xeaf3fb);
 
         const camera = new THREE.PerspectiveCamera(42, host.clientWidth / host.clientHeight, 0.1, 200);
         camera.position.set(10, 7, 15);
@@ -1311,88 +1323,90 @@
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.target.set(0, 3.5, 0);
         controls.enablePan = false;
         controls.minDistance = 8;
         controls.maxDistance = 28;
         controls.maxPolarAngle = Math.PI / 2.1;
+        controls.target.set(0, 3.4, 0);
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.2;
 
-        const hemi = new THREE.HemisphereLight(0xffffff, 0xa3b6c7, 0.9);
+        const hemi = new THREE.HemisphereLight(0xffffff, 0xa7b9c8, 1);
         scene.add(hemi);
-        const dir1 = new THREE.DirectionalLight(0xffffff, 0.9);
-        dir1.position.set(8, 12, 10);
-        scene.add(dir1);
 
-        const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x495560, metalness: 0.5, roughness: 0.45 });
-        const panelMaterial = new THREE.MeshStandardMaterial({ color: 0xe9edf1, roughness: 0.7, metalness: 0.3 });
-        const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x1f2328, roughness: 0.55, metalness: 0.2 });
-        const burnMaterial = new THREE.MeshStandardMaterial({ color: 0xb7c0c8, roughness: 0.5, metalness: 0.55 });
-        const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xc7a34b, roughness: 0.4, metalness: 0.8 });
-        const blueMaterial = new THREE.MeshStandardMaterial({ color: 0x7ab7ff, roughness: 0.3, metalness: 0.2 });
+        const key = new THREE.DirectionalLight(0xffffff, 1.1);
+        key.position.set(9, 12, 12);
+        scene.add(key);
 
-        const root = new THREE.Group();
-        scene.add(root);
+        const group = new THREE.Group();
+        scene.add(group);
 
-        const base = new THREE.Mesh(new THREE.BoxGeometry(12, 1, 8), baseMaterial);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0x4a5869, metalness: 0.45, roughness: 0.52 });
+        const panelMat = new THREE.MeshStandardMaterial({ color: 0xe8edf4, metalness: 0.25, roughness: 0.72 });
+        const darkMat = new THREE.MeshStandardMaterial({ color: 0x1d2430, metalness: 0.3, roughness: 0.5 });
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xcaa65c, metalness: 0.86, roughness: 0.3 });
+        const blueMat = new THREE.MeshStandardMaterial({ color: 0x7ab7ff, metalness: 0.15, roughness: 0.35 });
+
+        const base = new THREE.Mesh(new THREE.BoxGeometry(12, 1, 8), baseMat);
         base.position.y = 0.5;
-        root.add(base);
+        group.add(base);
 
-        const body = new THREE.Mesh(new THREE.BoxGeometry(8, 4, 5), panelMaterial);
+        const body = new THREE.Mesh(new THREE.BoxGeometry(8, 4, 5), panelMat);
         body.position.set(0, 3.2, 0);
-        root.add(body);
+        group.add(body);
 
-        const hood = new THREE.Mesh(new THREE.BoxGeometry(5.8, 2.8, 5.2), darkMaterial);
-        hood.position.set(0, 6.2, 0);
-        root.add(hood);
+        const hood = new THREE.Mesh(new THREE.BoxGeometry(5.8, 2.8, 5.2), darkMat);
+        hood.position.set(0, 6.1, 0);
+        group.add(hood);
 
-        const hoodOpen = new THREE.Group();
-        const panel = new THREE.Mesh(new THREE.BoxGeometry(4.3, 2.2, 0.2), darkMaterial);
-        panel.position.set(0, 6.2, 2.5);
-        hoodOpen.add(panel);
-        root.add(hoodOpen);
+        const hoodCover = new THREE.Group();
+        const coverPanel = new THREE.Mesh(new THREE.BoxGeometry(4.3, 2.1, 0.18), darkMat);
+        coverPanel.position.set(0, 6.1, 2.4);
+        hoodCover.add(coverPanel);
+        group.add(hoodCover);
 
         const burner = new THREE.Group();
-        const burnerBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.5, 1.2), burnMaterial);
+        const burnerBody = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.5, 1.2), new THREE.MeshStandardMaterial({ color: 0x9aa7b7, roughness: 0.5, metalness: 0.62 }));
         burnerBody.position.set(0, 2.7, 2.2);
         burner.add(burnerBody);
-        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.6, 24), goldMaterial);
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.7, 24), goldMat);
         nozzle.rotation.x = Math.PI / 2;
         nozzle.position.set(0, 2.95, 2.95);
         burner.add(nozzle);
-        root.add(burner);
+        group.add(burner);
 
         const lamp = new THREE.Group();
-        const lampBody = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 1.5, 30), new THREE.MeshStandardMaterial({ color: 0xeff6ff, transparent: true, opacity: 0.88, roughness: 0.2, metalness: 0.1 }));
-        lampBody.position.set(4, 3.7, 0);
+        const lampBody = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 1.6, 24), new THREE.MeshStandardMaterial({ color: 0xf0f6ff, roughness: 0.18, metalness: 0.12, transparent: true, opacity: 0.9 }));
+        lampBody.position.set(4.2, 3.7, 0);
         lamp.add(lampBody);
-        const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.7, 20), darkMaterial);
-        lampBase.position.set(4, 2.65, 0);
+        const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.8, 20), darkMat);
+        lampBase.position.set(4.2, 2.7, 0);
         lamp.add(lampBase);
-        root.add(lamp);
+        group.add(lamp);
 
-        const mon = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 1), new THREE.MeshStandardMaterial({ color: 0x5f7c87, roughness: 0.6, metalness: 0.4 }));
-        mon.position.set(-4.5, 4.5, 0.3);
-        root.add(mon);
+        const mon = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 1), new THREE.MeshStandardMaterial({ color: 0x5f7a8b, roughness: 0.6, metalness: 0.42 }));
+        mon.position.set(-4.6, 4.5, 0.3);
+        group.add(mon);
 
-        const detector = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x6f7a87, roughness: 0.5, metalness: 0.5 }));
+        const detector = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x6f7b89, roughness: 0.45, metalness: 0.52 }));
         detector.position.set(-5.3, 3.2, 0.8);
-        root.add(detector);
+        group.add(detector);
 
-        const gasTube = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 5, 20), blueMaterial);
-        gasTube.rotation.z = Math.PI / 2;
-        gasTube.position.set(-2.2, 2.8, 2.3);
-        root.add(gasTube);
+        const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 5, 20), blueMat);
+        tube.rotation.z = Math.PI / 2;
+        tube.position.set(-2.3, 2.8, 2.3);
+        group.add(tube);
 
         const flame = new THREE.Group();
-        const flameShape = new THREE.Mesh(
-          new THREE.ConeGeometry(0.5, 1.8, 24, 1, true),
+        const flameBody = new THREE.Mesh(
+          new THREE.ConeGeometry(0.52, 1.8, 26, 1, true),
           new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
         );
-        flameShape.position.y = 0.8;
-        flame.add(flameShape);
+        flameBody.position.y = 0.8;
+        flame.add(flameBody);
         flame.position.set(0, 3.1, 2.3);
         flame.visible = false;
-        root.add(flame);
+        group.add(flame);
 
         const pointLight = new THREE.PointLight(0xffb347, 0, 10, 2);
         pointLight.position.set(0, 4.2, 2.5);
@@ -1402,8 +1416,8 @@
         scene.add(labels);
 
         const labelData = [
-          ['HCL Cu 324,8 nm', 4.3, 5.4, 0],
-          ['Nebulizer / spray chamber', 0.2, 5.2, 3.8],
+          ['HCL Cu 324,8 nm', 4.3, 5.5, 0],
+          ['Nebulizer / chamber', 0.2, 5.2, 3.8],
           ['Burner / nyala', 0.2, 3.8, 5.0],
           ['Monokromator', -4.9, 6.0, 0.4],
           ['Detektor PMT', -5.6, 3.5, 1.5]
@@ -1414,29 +1428,23 @@
           canvas.width = 420;
           canvas.height = 80;
           const ctx = canvas.getContext('2d');
-          ctx.fillStyle = 'rgba(15, 23, 42, 0.80)';
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.82)';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.strokeStyle = '#dfe7f1';
           ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
           ctx.fillStyle = '#f8fafc';
-          ctx.font = 'bold 20px Segoe UI';
+          ctx.font = 'bold 18px Segoe UI';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-          const tex = new THREE.CanvasTexture(canvas);
-          const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+
+          const texture = new THREE.CanvasTexture(canvas);
+          const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true }));
           sprite.position.set(x, y, z);
           sprite.scale.set(3.6, 0.7, 1);
           labels.add(sprite);
         });
-
         labels.visible = false;
-
-        const toggleFlameEl = document.getElementById('toggleFlame');
-        const toggleLabelEl = document.getElementById('toggleLabel');
-        const toggleAutoRotateEl = document.getElementById('toggleAutoRotate');
-        const toggleCoverEl = document.getElementById('toggleCover');
-        const toggleProcessEl = document.getElementById('toggleProcess');
 
         let flameOn = false;
         let showLabels = false;
@@ -1444,87 +1452,73 @@
         let coverOpen = false;
         let processMode = false;
 
-        const viewTargets = {
-          iso: new THREE.Vector3(0, 4.5, 0),
-          front: new THREE.Vector3(0, 4.4, 0),
-          top: new THREE.Vector3(0, 18, 0),
-        };
-
         document.querySelectorAll('[data-view]').forEach(btn => {
           btn.addEventListener('click', () => {
-            const key = btn.dataset.view;
-            if (key === 'iso') {
-              camera.position.set(10, 7, 15);
-              controls.target.set(0, 3.5, 0);
-            } else if (key === 'front') {
-              camera.position.set(0, 5, 16);
-              controls.target.set(0, 3.5, 0);
-            } else if (key === 'top') {
-              camera.position.set(0, 24, 0.5);
-              controls.target.set(0, 3.5, 0);
-            }
+            document.querySelectorAll('[data-view]').forEach(item => item.classList.toggle('active', item === btn));
+            const view = btn.dataset.view;
+            if (view === 'iso') camera.position.set(10, 7, 15);
+            if (view === 'front') camera.position.set(0, 5, 16);
+            if (view === 'top') camera.position.set(0, 24, 0.5);
+            camera.lookAt(0, 3.4, 0);
           });
         });
 
-        toggleFlameEl.addEventListener('click', () => {
+        document.getElementById('toggleFlame').addEventListener('click', () => {
           flameOn = !flameOn;
           flame.visible = flameOn;
           pointLight.intensity = flameOn ? 2.8 : 0;
-          toggleFlameEl.classList.toggle('active', flameOn);
-          toggleFlameEl.textContent = flameOn ? 'Matikan api' : 'Nyalakan api';
+          document.getElementById('toggleFlame').classList.toggle('active', flameOn);
+          document.getElementById('toggleFlame').textContent = flameOn ? 'Matikan api' : 'Nyalakan api';
         });
 
-        toggleLabelEl.addEventListener('click', () => {
+        document.getElementById('toggleLabel').addEventListener('click', () => {
           showLabels = !showLabels;
           labels.visible = showLabels;
-          toggleLabelEl.classList.toggle('active', showLabels);
+          document.getElementById('toggleLabel').classList.toggle('active', showLabels);
         });
 
-        toggleAutoRotateEl.addEventListener('click', () => {
+        document.getElementById('toggleRotate').addEventListener('click', () => {
           autoRotate = !autoRotate;
           controls.autoRotate = autoRotate;
-          toggleAutoRotateEl.classList.toggle('active', autoRotate);
+          document.getElementById('toggleRotate').classList.toggle('active', autoRotate);
         });
 
-        toggleCoverEl.addEventListener('click', () => {
+        document.getElementById('toggleCover').addEventListener('click', () => {
           coverOpen = !coverOpen;
-          hoodOpen.rotation.y = coverOpen ? -0.8 : 0;
-          hoodOpen.position.x = coverOpen ? 0.6 : 0;
-          toggleCoverEl.classList.toggle('active', coverOpen);
-          toggleCoverEl.textContent = coverOpen ? 'Tutup penutup' : 'Buka penutup';
+          hoodCover.rotation.y = coverOpen ? -0.8 : 0;
+          hoodCover.position.x = coverOpen ? 0.6 : 0;
+          const btn = document.getElementById('toggleCover');
+          btn.classList.toggle('active', coverOpen);
+          btn.textContent = coverOpen ? 'Tutup penutup' : 'Buka penutup';
         });
 
-        toggleProcessEl.addEventListener('click', () => {
+        document.getElementById('toggleProcess').addEventListener('click', () => {
           processMode = !processMode;
-          const opacity = processMode ? 0.28 : 1;
-          body.material.transparent = processMode;
-          body.material.opacity = opacity;
-          toggleProcessEl.classList.toggle('active', processMode);
+          const btn = document.getElementById('toggleProcess');
+          btn.classList.toggle('active', processMode);
           if (processMode) {
             flameOn = true;
             flame.visible = true;
             pointLight.intensity = 2.8;
-            toggleFlameEl.textContent = 'Matikan api';
-            toggleFlameEl.classList.add('active');
+            document.getElementById('toggleFlame').textContent = 'Matikan api';
+            document.getElementById('toggleFlame').classList.add('active');
           } else {
             flameOn = false;
             flame.visible = false;
             pointLight.intensity = 0;
-            toggleFlameEl.textContent = 'Nyalakan api';
-            toggleFlameEl.classList.remove('active');
+            document.getElementById('toggleFlame').textContent = 'Nyalakan api';
+            document.getElementById('toggleFlame').classList.remove('active');
           }
         });
 
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 1.25;
-
         function resize() {
-          const w = host.clientWidth;
-          const h = host.clientHeight;
-          camera.aspect = w / h;
+          const width = host.clientWidth;
+          const height = host.clientHeight;
+          camera.aspect = width / height;
           camera.updateProjectionMatrix();
-          renderer.setSize(w, h);
+          renderer.setSize(width, height);
         }
+
         window.addEventListener('resize', resize);
         resize();
 
@@ -1532,19 +1526,19 @@
         function animate() {
           requestAnimationFrame(animate);
           const t = clock.getElapsedTime();
-          flame.position.y = 3.15 + Math.sin(t * 12) * 0.08;
+          flame.position.y = 3.1 + Math.sin(t * 12) * 0.08;
           flame.rotation.z = Math.sin(t * 7) * 0.35;
           controls.update();
           renderer.render(scene, camera);
         }
-
         animate();
       }
 
-      syncInputsFromState();
-      initDataBindings();
+      fillFields();
+      renderRows();
+      bindEvents();
       init3D();
-      updateAll();
+      refresh();
       switchTab('tab3d');
     })();
   </script>
