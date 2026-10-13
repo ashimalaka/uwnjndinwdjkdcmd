@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>3D AAS Viewer</title>
+  <link rel="stylesheet" href="./css/aas-viewer.css">
+</head>
+<body>
+  <main>
+    <h1>3D Instrument AAS — Interaktif</h1>
+    <div id="viewer-container">
+      <div id="canvas-wrap"></div>
+      <div id="controls">
+        <button id="btn-reset">Reset View</button>
+        <button id="btn-autospin">Toggle Auto-Spin</button>
+      </div>
+      <aside id="info-panel">
+        <h2>Kompartemen</h2>
+        <ul id="compartment-list"></ul>
+      </aside>
+    </div>
+  </main>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three@0.152.2/examples/jsm/renderers/CSS2DRenderer.js';
+
+    const container = document.getElementById('canvas-wrap');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf7f7f7);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, 1.2, 3);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(container.clientWidth, container.clientHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    container.appendChild(labelRenderer.domElement);
+
+    const controls = new OrbitControls(camera, labelRenderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 0.8;
+    controls.maxDistance = 8;
+
+    // Lights
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+    scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    dir.position.set(5, 10, 7.5);
+    scene.add(dir);
+
+    // Load model (ganti path bila perlu)
+    const loader = new GLTFLoader();
+    let modelRoot = null;
+    loader.load('/models/aas.gltf', (gltf) => {
+      modelRoot = gltf.scene;
+      // Opsional: cari node khusus jika model menamai part
+      // modelRoot.getObjectByName('burner_head') ...
+      // Normalisasi skala/posisi jika perlu
+      modelRoot.position.set(0, 0, 0);
+      // centering (jika perlu)
+      const box = new THREE.Box3().setFromObject(modelRoot);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z);
+      if (maxDim > 0) {
+        const scale = 1.5 / maxDim;
+        modelRoot.scale.setScalar(scale);
+      }
+      scene.add(modelRoot);
+
+      // Setelah model ter-load, pasang hotspot berdasarkan node name atau koordinat
+      setupHotspots(modelRoot);
+      populateCompartmentList();
+    }, undefined, (err) => {
+      console.error('Gagal memuat model:', err);
+    });
+
+    // Contoh daftar kompartemen + posisi (posisi placeholder, sesuaikan dengan model)
+    const compartments = [
+      { id: 'lamp', name: 'Lampu Katoda Berongga (HCL)', desc: 'Sumber panjang gelombang untuk unsur target.', pos: new THREE.Vector3(0.8, 0.9, 0.0) },
+      { id: 'optics', name: 'Bench Optik / Monokromator', desc: 'Jalur optik dan monokromator.', pos: new THREE.Vector3(0.0, 0.6, -0.2) },
+      { id: 'sample', name: 'Nebulizer & Spray Chamber', desc: 'Sistem pengantar sampel (nebulizer, ruang semprot).', pos: new THREE.Vector3(-0.8, 0.4, 0.2) },
+      { id: 'burner', name: 'Burner Head / Flame', desc: 'Area pembakaran untuk atomisasi.', pos: new THREE.Vector3(0.0, 0.1, 0.8) },
+      { id: 'detector', name: 'Detektor (PMT)', desc: 'Mendeteksi intensitas cahaya.', pos: new THREE.Vector3(0.9, 0.2, 0.4) },
+      { id: 'autosampler', name: 'Autosampler / Tray', desc: 'Rak vial dan mekanik autosampler.', pos: new THREE.Vector3(-0.5, 0.05, -0.7) },
+      { id: 'gaspanel', name: 'Panel Gas & Regulator', desc: 'Regulator dan port gas (asetilena/udara).', pos: new THREE.Vector3(0.85, -0.2, -0.6) },
+    ];
+
+    const hotspotObjects = {};
+
+    function setupHotspots(root) {
+      compartments.forEach(c => {
+        // Jika model GLTF berisi node dengan nama id, gunakan posisi node tersebut
+        let worldPos = c.pos.clone();
+        const namedNode = root.getObjectByName(c.id);
+        if (namedNode) {
+          namedNode.getWorldPosition(worldPos);
+        } else {
+          // Jika tidak ada node bernama, kita gunakan koordinat placeholder di atas
+          // Anda harus menyetel pos sesuai hasil inspeksi model
+        }
+
+        const div = document.createElement('div');
+        div.className = 'label';
+        div.textContent = c.name;
+        div.dataset.id = c.id;
+        div.addEventListener('click', () => focusOn(worldPos, c.id));
+        const label = new CSS2DObject(div);
+        label.position.copy(worldPos);
+        scene.add(label);
+        hotspotObjects[c.id] = { label, pos: worldPos };
+      });
+    }
+
+    // Focus & highlight
+    function focusOn(position, id) {
+      // animasi sederhana: pindahkan camera ke titik
+      const offset = new THREE.Vector3().subVectors(camera.position, controls.target).normalize().multiplyScalar(1.2);
+      controls.target.copy(position);
+      camera.position.copy(position).add(offset);
+      // highlight part jika model memiliki node bernama id
+      if (!modelRoot) return;
+      const node = modelRoot.getObjectByName(id);
+      if (node && node.material) {
+        // simpan warna lama
+        node.userData._orig = node.material.clone();
+        node.material = node.material.clone();
+        if (node.material.emissive) node.material.emissive.setHex(0x333333);
+      } else if (node) {
+        // traverse child meshes
+        node.traverse(m => {
+          if (m.isMesh && m.material) {
+            m.userData._orig = m.material.clone();
+            if (m.material.emissive) m.material.emissive.setHex(0x333333);
+          }
+        });
+      }
+    }
+
+    function populateCompartmentList() {
+      const ul = document.getElementById('compartment-list');
+      ul.innerHTML = '';
+      compartments.forEach(c => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = c.name;
+        a.onclick = (e) => { e.preventDefault(); focusOn(c.pos, c.id); };
+        const p = document.createElement('p');
+        p.textContent = c.desc;
+        li.appendChild(a);
+        li.appendChild(p);
+        ul.appendChild(li);
+      });
+    }
+
+    // Resize handling
+    window.addEventListener('resize', onWindowResize);
+    function onWindowResize() {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      labelRenderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    let autoSpin = false;
+    document.getElementById('btn-autospin').addEventListener('click', () => { autoSpin = !autoSpin; });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      controls.reset();
+      camera.position.set(0, 1.2, 3);
+      controls.update();
+    });
+
+    // Animasi loop
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      if (autoSpin) {
+        modelRoot && modelRoot.rotation.y += dt * 0.3; // putar perlahan
+      }
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
