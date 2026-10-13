@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 
@@ -100,6 +102,14 @@ def render(runs, params):
     if not runs:
         st.info("Data masih kosong.")
         return
+
+    st.markdown("### Viewer 3D AAS")
+    try:
+        viewer_path = Path(__file__).resolve().parents[1] / "aas3d.html"
+        html = viewer_path.read_text(encoding="utf-8")
+        st.components.v1.html(html, height=760, scrolling=False)
+    except Exception as exc:
+        st.warning(f"Viewer 3D gagal dimuat: {exc}")
 
     df = pd.DataFrame(runs)
     st.dataframe(df, hide_index=True)
