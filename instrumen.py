@@ -13,27 +13,73 @@ DEFAULT = pd.DataFrame({
 
 
 def render():
-    st.caption("Masukkan konsentrasi tiap larutan. Alat mensimulasikan absorbansi 3 replikat. "
-               "Jika Anda punya data praktikum, isi kolom absorbansi manual (menimpa simulasi).")
+    st.caption(
+        "Masukkan konsentrasi tiap larutan. Alat mensimulasikan absorbansi 3 replikat. "
+        "Jika Anda punya data praktikum, isi kolom absorbansi manual (menimpa simulasi)."
+    )
+
     with st.form("alat"):
         c = st.columns(5)
-        p = dict(line=c[0].selectbox("Garis Cu", list(instrument.LINES)),
-                 lamp=c[1].number_input("Arus lampu (mA)", 1.0, 15.0, 5.0, 0.5),
-                 slit=c[2].selectbox("Lebar celah (nm)", [0.2, 0.5, 0.7, 1.3], 1),
-                 fuel=c[3].slider("Rasio bahan bakar", 0.7, 1.5, 0.9, 0.05),
-                 uptake=c[4].number_input("Laju hisap (mL/mnt)", 2.0, 8.0, 5.0, 0.5))
-        df = st.data_editor(DEFAULT, num_rows="dynamic", column_config={
-            "Jenis": st.column_config.SelectboxColumn(options=["Blanko", "Standar", "Sampel"], required=True)})
+        p = dict(
+            line=c[0].selectbox("Garis Cu", list(instrument.LINES)),
+            lamp=c[1].number_input("Arus lampu (mA)", 1.0, 15.0, 5.0, 0.5),
+            slit=c[2].selectbox("Lebar celah (nm)", [0.2, 0.5, 0.7, 1.3], 1),
+            fuel=c[3].slider("Rasio bahan bakar", 0.7, 1.5, 0.9, 0.05),
+            uptake=c[4].number_input("Laju hisap (mL/mnt)", 2.0, 8.0, 5.0, 0.5),
+        )
+        df = st.data_editor(
+            DEFAULT,
+            num_rows="dynamic",
+            column_config={
+                "Jenis": st.column_config.SelectboxColumn(options=["Blanko", "Standar", "Sampel"], required=True)
+            },
+        )
         seed = st.number_input("Seed derau acak", 0, 9999, 1)
         st.form_submit_button("Terapkan ke instrumen")
+
     rng = np.random.default_rng(int(seed))
     runs = []
     for _, r in df.dropna(subset=["Konsentrasi (mg/L)"]).iterrows():
         man = r["Absorbansi manual (opsional)"]
         A = [float(man)] if pd.notna(man) else instrument.measure(float(r["Konsentrasi (mg/L)"]), p, rng)
         runs.append(dict(type=r["Jenis"], name=str(r["Nama"]), conc=float(r["Konsentrasi (mg/L)"]), A=A))
+
     st.session_state["runs"], st.session_state["params"] = runs, p
     viewer.render(runs, p)
+
+    st.markdown(
+        "### Kompartemen AAS yang ada di alat"
+        "\nDi bawah ini semua kompartemen utama dicantumkan secara rinci agar siswa dapat mengenali"
+        " bagian luar dan bagian dalam instrumen saat 3D viewer diputar 360 derajat."
+    )
+
+    comp_df = pd.DataFrame(
+        [
+            {
+                "No": c["id"],
+                "Nama kompartemen": c["outer"],
+                "Nama bagian dalam": "; ".join(c["inner"]),
+                "Fungsi utama": c["fn"],
+            }
+            for c in viewer.COMPONENTS
+        ]
+    )
+    st.dataframe(comp_df, hide_index=True, use_container_width=True)
+
+    with st.expander("Lihat rincian setiap kompartemen"):
+        for item in viewer.COMPONENTS:
+            st.markdown(
+                f"**{item['id']}. {item['outer']}**\n"
+                f"- Bagian dalam: {', '.join(item['inner'])}\n"
+                f"- Fungsi: {item['fn']}"
+            )
+
     st.caption("Model 3D skematik untuk pembelajaran. Garis 324,7 nm adalah UV (tak terlihat), berkasnya divisualisasikan ungu.")
-    st.dataframe(pd.DataFrame([{"No": c["id"], "Nama luar": c["outer"], "Nama dalam": "; ".join(c["inner"]), "Fungsi": c["fn"]}
-                               for c in viewer.COMPONENTS]), hide_index=True)
+
+    st.dataframe(
+        pd.DataFrame(
+            [{"No": c["id"], "Nama luar": c["outer"], "Nama dalam": "; ".join(c["inner"]), "Fungsi": c["fn"]}
+             for c in viewer.COMPONENTS]
+        ),
+        hide_index=True,
+    )
